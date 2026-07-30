@@ -1,21 +1,15 @@
 /**
  * 庙旺落陷亮度对照表
  * 
- * 数据来源: iztro (MIT) - 经文墨天机/元亨利贞校验
- *      https://github.com/SylarLong/iztro
+ * 搬运来源: iztro (MIT) https://github.com/SylarLong/iztro
+ *   STARS_INFO: 经文墨天机/元亨利贞校验
+ *   详见: src/iztro/data/stars.ts
  * 
  * 亮度等级对照：
- *   iztro -> 中文
- *   miao  -> 庙  (最亮)
- *   wang  -> 旺  (明亮)
- *   de    -> 得地 (适中)
- *   li    -> 利益 (稍暗)
- *   ping  -> 平和 (平常)
- *   bu    -> 不得地 (不利)
- *   xian  -> 落陷 (沦落)
+ *   miao→庙(最亮) wang→旺(明亮) de→得地(适中)
+ *   li→利益(稍暗) ping→平和(平常) bu→不得地 xian→落陷
  * 
- * 行索引：地支（子=0, 丑=1, ... 亥=11）0-indexed
- *        使用时需+1转1-indexed
+ * 行索引：地支 0=子, 1=丑, ... 11=亥 (0-indexed)
  */
 
 export type BrightnessLevel = 

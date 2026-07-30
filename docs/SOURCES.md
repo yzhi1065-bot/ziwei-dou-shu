@@ -1,54 +1,33 @@
-# 第三方来源标注 (Third-Party Sources)
+# 第三方来源 (Third-Party Sources)
 
-本项目整合了以下开源项目的代码和数据，均遵循 MIT 协议使用。
+本项目直接搬运并整合了以下开源项目的源码，遵循 MIT 协议。
 
-## 🔗 iztro (核心算法数据)
-
+## 1. iztro (核心算法库)
 - **仓库**: https://github.com/SylarLong/iztro
-- **协议**: MIT
-- **许可证**: Copyright (c) 2023 All Contributors
-- **使用内容**:
-  - `src/core/stars-data/brightness.ts` — 星曜庙旺落陷亮度表 (`STARS_INFO`)
-  - `src/core/palace/palace.ts` — 命主/身主表 (`earthlyBranches.soul`/`body`)
-  - `src/core/palace/minor-stars.ts` — 天魁天钺表验证
-  - `src/core/pattern/patterns-ref.ts` — 完整格局检测算法参考
-  - `src/core/stars-data/constants-ref.ts` — 星曜常量数据参考
-  - 完整源码备份: `src/iztro-ref/`
+- **协议**: MIT — Copyright (c) 2023 All Contributors
+- **搬运内容**: `src/iztro/` — 完整源码 (99个TS文件)
+  - 排盘算法 (astro/): 命盘生成、宫位计算
+  - 星曜算法 (star/): 主星、辅星、杂曜定位
+  - 数据 (data/): 星曜亮度、地支信息、天干四化
+  - 多语言 (i18n/): 中/英/日/韩/越
 
-## 🔗 Renhuai123/ziwei-doushu (经典知识数据)
+## 2. vue-ziwei (网页端参考)
+- **仓库**: https://github.com/8haoNetwork/vue-ziwei
+- **协议**: MIT — Copyright (c) 2025
+- **搬运内容**: `src/vue-ziwei-ref/` — 前端组件源码
+  - PalaceContent.vue — 宫位内星曜排版方式
+  - ZiWeiChart.vue — 4×4方盘布局
+  - i18n/ — 星曜/宫位/亮度多语言翻译
 
+## 3. Renhuai123/ziwei-doushu (经典知识)
 - **仓库**: https://github.com/Renhuai123/ziwei-doushu
-- **协议**: MIT
-- **许可证**: Copyright (c) 2026 紫微研究
-- **使用内容**:
-  - `docs/classics-ref/` — 紫微经典知识数据 (骨髓赋、全集、全书)
-  - `src/core/pattern/patterns-ref.ts` — 格局检测数据
-  - `src/core/stars-data/constants-ref.ts` — 常量验证参考
+- **协议**: MIT — Copyright (c) 2026 紫微研究
+- **搬运内容**: `src/next-ref/` — 经典数据
+  - 格局检测 patterns.ts (55KB, 60+格局)
+  - 倪海厦体系 nihai/ (天纪/地纪/人纪)
+  - 经典知识 classics/ (骨髓赋/全集/全书)
+  - 常量验证 constants.ts
 
-## 🔗 vue-ziwei (前端布局参考)
-
-- **来源**: vue-ziwei-main.zip (MIT)
-- **协议**: MIT
-- **许可证**: Copyright (c) 2025
-- **使用内容**:
-  - `src/web-page/src/components/ZiweiPlate.vue` — 宫位排版方式参考
-
-## 📦 项目数据流
-
-```
-iztro (MIT) ──→ brightness.ts (星曜亮度)
-             ──→ palace.ts (命主/身主)
-             ──→ patterns-ref.ts (格局算法参考)
-             
-Renhuai123/ ──→ classics-ref/ (经典知识)
-ziwei-doushu ──→ constants-ref.ts (常量验证)
-   (MIT)     ──→ patterns-ref.ts (格局数据)
-
-vue-ziwei ──→ ZiweiPlate.vue (宫位排版布局)
-  (MIT)
-```
-
-## ⚖️ 合规声明
-
-以上所有第三方代码均已按照 MIT 协议要求使用，保留原始版权声明。
-MIT 协议允许：自由使用、修改、分发、商用，需保留版权声明。
+## 本项目的自定义算法
+- `src/core/` — 自研TS算法 (历法/安星/四化/大限)
+- 基于iztro验证数据修正亮度表、命主身主、天魁天钺
