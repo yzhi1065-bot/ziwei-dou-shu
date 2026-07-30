@@ -1,0 +1,33 @@
+{
+  "name": "ziwei-dou-shu",
+  "version": "1.0.0",
+  "description": "紫微斗数排盘系统 - Zi Wei Dou Shu Fortune-Telling System",
+  "type": "module",
+  "main": "dist/core/index.js",
+  "module": "dist/core/index.js",
+  "types": "dist/core/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "build:core": "tsc -p src/core/tsconfig.json",
+    "build:web": "cd src/web-page && npm run build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "dev:web": "cd src/web-page && npm run dev",
+    "validate": "tsc --noEmit"
+  },
+  "keywords": [
+    "ziwei",
+    "doushu",
+    "紫微斗数",
+    "fortune-telling",
+    "chinese-astrology"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0",
+    "tsx": "^4.7.0"
+  },
+  "dependencies": {}
+}

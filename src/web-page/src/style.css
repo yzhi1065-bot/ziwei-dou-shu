@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 国风全局样式 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&display=swap');
+
+:root {
+  --color-zhuque: #B22222;
+  --color-shiqing: #2F4F4F;
+  --color-zheshi: #CC7722;
+  --color-mibai: #F5F0E1;
+  --color-jinbo: #D4A017;
+  --color-mose: #1A1A2E;
+  --color-xuanzhi: #F8F4E6;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Noto Serif SC', 'STSong', 'SimSun', serif;
+  background-color: var(--color-xuanzhi);
+  color: var(--color-mose);
+  min-height: 100vh;
+}
+
+/* 滚动条国风样式 */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #e8e0d0;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-zheshi);
+  border-radius: 4px;
+}
+
+/* 云纹边框装饰 */
+.cloud-border {
+  border: 2px solid var(--color-zheshi);
+  border-image: repeating-linear-gradient(
+    45deg,
+    var(--color-jinbo) 0px,
+    transparent 5px,
+    var(--color-jinbo) 10px
+  ) 10;
+}
+
+/* 卷轴样式 */
+.scroll-panel {
+  background: linear-gradient(
+    to bottom,
+    #f0e8d0 0%,
+    #f8f4e6 3%,
+    #f8f4e6 97%,
+    #f0e8d0 100%
+  );
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  border-left: 3px solid #d4c5a9;
+  border-right: 3px solid #d4c5a9;
+}
+
+/* 星曜文字亮度颜色 */
+.brightness-miao { color: #c0392b; font-weight: 900; }
+.brightness-wang { color: #e67e22; font-weight: 700; }
+.brightness-dedi { color: #d4a017; font-weight: 600; }
+.brightness-liyi { color: #7f8c8d; }
+.brightness-ping { color: #95a5a6; }
+.brightness-luoxian { color: #5d6d7e; opacity: 0.6; }
+
+/* 四化标记 */
+.hua-lu { color: #e74c3c; }     /* 化禄-红 */
+.hua-quan { color: #8e44ad; }   /* 化权-紫 */
+.hua-ke { color: #2980b9; }     /* 化科-蓝 */
+.hua-ji { color: #1a1a2e; }     /* 化忌-黑 */

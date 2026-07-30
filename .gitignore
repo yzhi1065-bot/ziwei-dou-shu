@@ -1,0 +1,47 @@
+# 紫微斗数 - 开源项目
+# 忽略文件
+
+# 依赖
+node_modules/
+.pnp
+.pnp.js
+
+# 构建输出
+dist/
+build/
+*.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+*.sublime-workspace
+
+# 日志
+*.log
+npm-debug.log*
+
+# 环境文件
+.env
+.env.local
+.env.*.local
+
+# 网页端
+src/web-page/node_modules/
+src/web-page/dist/
+src/web-page/.vite/
+
+# 小程序端
+src/mini-program/node_modules/
+src/mini-program/dist/
+src/mini-program/unpackage/
+
+# 测试输出
+coverage/
+.vite/
