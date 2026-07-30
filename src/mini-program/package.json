@@ -1,0 +1,19 @@
+{
+  "name": "ziwei-mini",
+  "version": "1.0.0",
+  "description": "紫微斗数排盘 - 微信小程序",
+  "private": true,
+  "scripts": {
+    "dev": "uni-app -p mp-weixin",
+    "build": "uni-app build -p mp-weixin"
+  },
+  "dependencies": {
+    "@dcloudio/uni-app": "^3.0.0",
+    "@dcloudio/uni-ui": "^1.4.0"
+  },
+  "devDependencies": {
+    "@dcloudio/uni-cli-i18n": "^3.0.0",
+    "@dcloudio/uni-mp-weixin": "^3.0.0",
+    "vue": "^3.3.0"
+  }
+}
