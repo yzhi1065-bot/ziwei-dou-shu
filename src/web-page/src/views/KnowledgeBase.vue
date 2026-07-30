@@ -1,42 +1,40 @@
 <template>
   <div class="max-w-4xl mx-auto">
-    <h2 class="text-2xl font-song font-bold text-mose mb-6">知识库</h2>
-    
-    <div class="scroll-panel rounded-lg p-6 mb-4">
-      <h3 class="font-song font-bold text-lg text-mose border-b border-gray-200 pb-2 mb-4">14主星</h3>
-      <div class="grid grid-cols-2 md:grid-cols-3 gap-3" v-if="mainStars.length">
-        <div v-for="star in mainStars.slice(0,14)" :key="star.id"
-             class="p-3 rounded bg-white/50 border border-gray-100 hover:border-zheshi cursor-pointer transition-colors"
-             @click="selectedStarId = star.id">
-          <div class="font-bold text-sm">{{ star.nameCn }}</div>
-          <div class="text-xs text-gray-400">{{ star.nameEn }}</div>
+    <h2 class="text-2xl font-song font-bold text-mose mb-6">紫微知识库</h2>
+    <div class="text-xs text-gray-400 mb-4">数据来源：iztro + Renhuai123/ziwei-doushu (MIT)</div>
+
+    <div class="scroll-panel rounded-lg p-4 mb-4">
+      <h3 class="font-song font-bold text-sm text-mose border-b pb-1 mb-3">14主星</h3>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+        <div v-for="s in stars" :key="s.id" class="p-2 rounded bg-white/50 border hover:border-zheshi cursor-pointer text-center"
+             @click="sel=s.id">
+          <div class="font-bold text-sm">{{ s.name }}</div>
+          <div class="text-xs text-gray-400">{{ s.en }}</div>
         </div>
       </div>
     </div>
 
-    <!-- 星曜详情弹窗 -->
-    <div v-if="selectedStarId" class="fixed inset-0 bg-black/30 flex items-center justify-center z-50"
-         @click.self="selectedStarId = ''">
-      <div class="scroll-panel rounded-lg p-6 max-w-md mx-4">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="font-song font-bold text-lg">{{ currentStar?.name || '' }}</h3>
-          <button @click="selectedStarId = ''" class="text-gray-400 hover:text-mose text-xl">&times;</button>
-        </div>
-        <div class="space-y-2 text-sm">
-          <p><span class="text-gray-500">英文名：</span>{{ currentStar?.nameEn }}</p>
-          <p><span class="text-gray-500">星曜属性：</span>{{ currentStar?.group }} · {{ currentStar?.element }} · {{ currentStar?.yinyang }}</p>
-          <p><span class="text-gray-500">吉凶：</span>{{ currentStar?.luck }}</p>
-          <p class="text-gray-600 leading-relaxed mt-3">{{ currentStar?.description }}</p>
-          <p v-if="currentStar?.symbolism" class="flex flex-wrap gap-1 mt-2">
-            <span v-for="s in currentStar?.symbolism" :key="s"
-                  class="text-xs bg-mibai px-2 py-0.5 rounded border border-gray-200">{{ s }}</span>
-          </p>
-        </div>
+    <div v-if="selStar" class="scroll-panel rounded-lg p-4 mb-4">
+      <h3 class="font-bold text-sm border-b pb-1 mb-2">{{ selStar.nameCn }} ({{ selStar.en }})</h3>
+      <div class="text-xs space-y-1">
+        <p><span class="text-gray-500">属性：</span>{{ selStar.group }} · {{ selStar.element }} · {{ selStar.yinYang }}</p>
+        <p><span class="text-gray-500">特性：</span>{{ selStar.keywords || '' }}</p>
+        <p class="text-gray-600 mt-2">{{ selStar.description }}</p>
       </div>
     </div>
 
-    <div class="text-center py-6 text-sm text-gray-400">
-      更多内容（格局释义、辅煞星详解）开发中...
+    <div class="scroll-panel rounded-lg p-4">
+      <h3 class="font-song font-bold text-sm text-mose border-b pb-1 mb-3">经典古籍</h3>
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+        <div v-for="b in books" :key="b.n" class="p-3 rounded bg-white/50 border hover:border-zheshi cursor-pointer"
+             @click="selBook=b.n">
+          <div class="font-bold text-xs">{{ b.n }}</div>
+          <div class="text-xs text-gray-400">{{ b.d }}</div>
+        </div>
+      </div>
+      <div v-if="selBook" class="mt-3 p-3 bg-mibai rounded text-xs leading-relaxed max-h-60 overflow-y-auto">
+        <p v-for="(l,i) in bookContent" :key="i">{{ l }}</p>
+      </div>
     </div>
   </div>
 </template>
@@ -45,8 +43,23 @@
 import { ref, computed } from 'vue'
 import { MAIN_STARS, getAllMainStars } from '../../../core/stars-data/main-stars'
 
-const mainStars = getAllMainStars()
-const selectedStarId = ref('')
+const stars = getAllMainStars().map(s => ({ id: s.id, name: s.name, en: s.nameEn }))
+const sel = ref('')
+const selStar = computed(() => sel.value ? MAIN_STARS[sel.value] : null)
 
-const currentStar = computed(() => MAIN_STARS[selectedStarId.value])
+const books = [
+  { n: '骨髓赋', d: '紫微斗数重要经典' },
+  { n: '紫微斗数全集', d: '陈抟祖师传·明代刊本' },
+  { n: '紫微斗数全书', d: '罗洪先编·明代刊本' },
+]
+const selBook = ref('')
+const bookContent = computed(() => {
+  try {
+    const b = selBook.value
+    if (b === '骨髓赋') return ['（古籍内容参考 src/ziwei-doushu/classics/data/gusuifu.ts）']
+    if (b === '紫微斗数全集') return ['（古籍内容参考 src/ziwei-doushu/classics/data/quanji.ts）']
+    if (b === '紫微斗数全书') return ['（古籍内容参考 src/ziwei-doushu/classics/data/quanshu.ts）']
+  } catch {}
+  return []
+})
 </script>

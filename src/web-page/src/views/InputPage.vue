@@ -129,12 +129,13 @@ function fillExample(ex: typeof examples[0]) {
   form.gender = ex.gender
 }
 
-function handleSubmit() {
-  chartStore.generateChart(
+async function handleSubmit() {
+  await chartStore.generateChart(
     form.year, form.month, form.day,
     form.hour, form.minute,
     form.gender, form.school
   )
+  ;(window as any).__CHART_DATA = chartStore.chartResult
   router.push('/chart')
 }
 </script>
