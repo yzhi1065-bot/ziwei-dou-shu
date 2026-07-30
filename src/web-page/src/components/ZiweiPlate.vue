@@ -1,54 +1,11 @@
-<template>
-  <div class="square-plate" :style="{ width: size + 'px' }">
-    <div v-for="(cell, idx) in grid" :key="idx"
-         class="plate-cell"
-         :class="{ 'cell-center': cell.isCenter, 'cell-ming': cell.palace?.isMing, 'cell-shen': cell.palace?.isShen }"
-         :style="{ 
-           gridRow: cell.rowSpan ? `${cell.row + 1} / span ${cell.rowSpan}` : cell.row + 1,
-           gridColumn: cell.colSpan ? `${cell.col + 1} / span ${cell.colSpan}` : cell.col + 1
-         }"
-         @click="cell.palace && $emit('selectPalace', cell.palace.palaceIndex)">
-
-      <!-- 中宫：四柱/五行局/命主身主 -->
-      <template v-if="cell.isCenter">
-        <div class="center-grid">
-          <div class="center-item" v-for="item in centerInfo" :key="item.l">
-            <span class="center-label">{{ item.l }}</span>
-            <span class="center-value">{{ item.v }}</span>
-          </div>
-        </div>
-      </template>
-
-      <!-- 宫位格 -->
-      <template v-else-if="cell.palace">
-        <!-- 宫头：宫名（左）+ 干支（右） -->
-        <div class="cell-head">
-          <span class="cell-palace-name">{{ cell.palace.name }}</span>
-          <span class="cell-ganzhi">{{ cell.palace.stem }}{{ cell.palace.branch }}</span>
-        </div>
-
-        <!-- 主星（带四化紧跟） -->
-        <div class="cell-stars">
-          <div v-for="starId in cell.palace.mainStars" :key="'m'+starId" class="star-line">
-            <span class="star-main" :class="brightClass(starId, cell.palace.branchIndex)"
-                  @click.stop="$emit('selectStar', starId)">
-              {{ getStarName(starId) }}
-            </span>
-            <span v-if="getHua(starId)" class="star-hua" :class="'h-' + getHua(starId)">【{{ getHua(starId) }}】</span>
-          </div>
-          <div v-if="cell.palace.mainStars.length === 0" class="star-empty" style="padding-top:4px;">空</div>
-        </div>
-
-        <!-- 辅煞星（小字紧凑） -->
-        <div class="cell-aux" v-if="auxList(cell.palace).length">
-          <span v-for="a in auxList(cell.palace)" :key="a.id" :class="'aux-' + a.typ">{{ a.nm }}</span>
-        </div>
-      </template>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
+/**
+ * 紫微斗数方盘组件
+ * 
+ * 布局参考: vue-ziwei (MIT) — PalaceContent.vue 宫位排版方式
+ * 数据来源: iztro (MIT) https://github.com/SylarLong/iztro — 验证的星曜亮度/地支数据
+ *           Renhuai123/ziwei-doushu (MIT) — 经典知识数据
+ */
 import { computed } from 'vue'
 import type { PalaceInfo, HuaType } from '../../../core/types'
 import { STAR_NAMES } from '../../../core/stars-data/star-names'
@@ -70,11 +27,14 @@ const props = defineProps<{
 
 defineEmits<{ selectPalace: [idx: number]; selectStar: [starId: string] }>()
 
+// 地支→网格坐标 (4×4 传统方盘布局)
+// 来源: vue-ziwei (MIT) ZiWeiChart.vue 4x4 grid layout
 const BRANCH_GRID: Record<number, [number, number]> = {
-  1:[3,2], 2:[3,1], 3:[3,0], 4:[2,0], 5:[1,0], 6:[0,0],
-  7:[0,1], 8:[0,2], 9:[0,3], 10:[1,3], 11:[2,3], 12:[3,3]
+  6:[0,0], 7:[0,1], 8:[0,2], 9:[0,3],
+  5:[1,0],                    10:[1,3],
+  4:[2,0],                    11:[2,3],
+  3:[3,0], 2:[3,1], 1:[3,2], 12:[3,3]
 }
-const CENTER = [[1,1],[1,2],[2,1],[2,2]] // 仍然用于判断
 
 interface Cell { row: number; col: number; rowSpan?: number; colSpan?: number; palace: PalaceInfo | null; isCenter: boolean }
 
@@ -82,12 +42,10 @@ const grid = computed<Cell[]>(() => {
   const byBr: Record<number, PalaceInfo> = {}
   props.palaces.forEach(p => { byBr[p.branchIndex] = p })
   const cells: Cell[] = []
-  // 先放中宫（单跨4格）
   cells.push({ row: 1, col: 1, rowSpan: 2, colSpan: 2, palace: null, isCenter: true })
-  // 再放外围12宫
   for (let r = 0; r < 4; r++) {
     for (let c = 0; c < 4; c++) {
-      if (CENTER.some(cc => cc[0] === r && cc[1] === c)) continue
+      if ((r === 1 || r === 2) && (c === 1 || c === 2)) continue
       let bi = -1
       for (const [k, v] of Object.entries(BRANCH_GRID)) {
         if (v[0] === r && v[1] === c) { bi = parseInt(k); break }
@@ -101,7 +59,7 @@ const grid = computed<Cell[]>(() => {
 const centerInfo = computed<CenterItem[]>(() => {
   const a: CenterItem[] = []
   if (props.fourPillars) a.push({ l: '四柱', v: `${props.fourPillars.year} ${props.fourPillars.month} ${props.fourPillars.day} ${props.fourPillars.hour}` })
-  if (props.elementPhase) a.push({ l: '五行局', v: props.elementPhase })
+  if (props.elementPhase) a.push({ l: '局', v: props.elementPhase })
   if (props.mingMaster) a.push({ l: '命主', v: props.mingMaster })
   if (props.shenMaster) a.push({ l: '身主', v: props.shenMaster })
   return a
@@ -129,6 +87,57 @@ function auxList(p: PalaceInfo): AuxItem[] {
 }
 </script>
 
+<template>
+  <div class="square-plate" :style="{ width: size + 'px' }">
+    <div v-for="(cell, idx) in grid" :key="idx"
+         class="plate-cell"
+         :class="{ 'cell-center': cell.isCenter, 'cell-ming': cell.palace?.isMing, 'cell-shen': cell.palace?.isShen }"
+         :style="{ 
+           gridRow: cell.rowSpan ? `${cell.row + 1} / span ${cell.rowSpan}` : cell.row + 1,
+           gridColumn: cell.colSpan ? `${cell.col + 1} / span ${cell.colSpan}` : cell.col + 1
+         }"
+         @click="cell.palace && $emit('selectPalace', cell.palace.palaceIndex)">
+
+      <template v-if="cell.isCenter">
+        <div class="center-grid">
+          <div class="center-item" v-for="item in centerInfo" :key="item.l">
+            <span class="center-label">{{ item.l }}</span>
+            <span class="center-value">{{ item.v }}</span>
+          </div>
+        </div>
+      </template>
+
+      <template v-else-if="cell.palace">
+        <!-- 身宫竖标 -->
+        <div v-if="cell.palace.isShen" class="shen-tag">身</div>
+
+        <!-- 宫头：宫名(左) + 干支(右) -->
+        <div class="cell-head">
+          <span class="cell-palace-name">{{ cell.palace.name }}</span>
+          <span class="cell-ganzhi">{{ cell.palace.stem }}{{ cell.palace.branch }}</span>
+        </div>
+
+        <!-- 主星区(纵排) + 四化紧跟 -->
+        <div class="cell-stars">
+          <div v-for="starId in cell.palace.mainStars" :key="'m'+starId" class="star-line">
+            <span class="star-main" :class="brightClass(starId, cell.palace.branchIndex)"
+                  @click.stop="$emit('selectStar', starId)">
+              {{ getStarName(starId) }}
+            </span>
+            <span v-if="getHua(starId)" class="star-hua" :class="'h-' + getHua(starId)">{{ getHua(starId) }}</span>
+          </div>
+          <div v-if="cell.palace.mainStars.length === 0" class="star-empty">空</div>
+        </div>
+
+        <!-- 辅煞星(底部紧凑) -->
+        <div class="cell-aux" v-if="auxList(cell.palace).length">
+          <span v-for="a in auxList(cell.palace)" :key="a.id" :class="'aux-' + a.typ">{{ a.nm }}</span>
+        </div>
+      </template>
+    </div>
+  </div>
+</template>
+
 <style scoped>
 .square-plate {
   display: grid;
@@ -140,7 +149,6 @@ function auxList(p: PalaceInfo): AuxItem[] {
   padding: 2px;
   max-width: 100%;
 }
-
 .plate-cell {
   background: #fcf8f0;
   border: 1px solid #d4c5a9;
@@ -155,83 +163,40 @@ function auxList(p: PalaceInfo): AuxItem[] {
 .plate-cell:hover { background: #f8f0e0; }
 .cell-ming { background: #fef6e0 !important; border: 2px solid #d4a017 !important; }
 .cell-shen { border: 2px solid #8aaa7a !important; }
-.cell-center {
-  background: #efe4d0 !important;
-  border: none !important;
-  cursor: default;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.cell-center { background: #efe4d0 !important; border: none !important; cursor: default; display: flex; align-items: center; justify-content: center; }
+
+.shen-tag {
+  position: absolute; left: 1px; top: 50%; transform: translateY(-50%);
+  writing-mode: vertical-rl; font-size: 9px; color: #6b8e8e; font-weight: bold;
+  letter-spacing: 2px;
 }
 
-/* 中宫 */
 .center-grid { display: flex; flex-direction: column; gap: 4px; padding: 4px; }
 .center-item { display: flex; flex-direction: column; align-items: center; gap: 0; }
 .center-label { font-size: 8px; color: #a09080; letter-spacing: 1px; }
 .center-value { font-size: 11px; color: #5a3e2b; font-weight: bold; }
 
-/* 宫头 */
-.cell-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  padding-bottom: 2px;
-  border-bottom: 1px solid #e8e0d0;
-  margin-bottom: 2px;
-  flex-shrink: 0;
-}
+.cell-head { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 2px; border-bottom: 1px solid #e8e0d0; margin-bottom: 2px; flex-shrink: 0; }
 .cell-palace-name { font-size: 12px; font-weight: bold; color: #6b4226; }
 .cell-ganzhi { font-size: 9px; color: #a09080; }
 
-/* 主星区 */
-.cell-stars {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 0;
-  min-height: 0;
-  padding: 2px 0;
-}
-.star-line {
-  display: flex;
-  align-items: center;
-  gap: 1px;
-  line-height: 1.25;
-}
-.star-main {
-  font-size: 13px; font-weight: 700; color: #1a1a2e;
-  white-space: nowrap;
-  cursor: pointer;
-}
+.cell-stars { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 0; min-height: 0; padding: 2px 0; }
+.star-line { display: flex; align-items: center; gap: 1px; line-height: 1.25; }
+.star-main { font-size: 13px; font-weight: 700; color: #1a1a2e; white-space: nowrap; cursor: pointer; }
 .star-main:hover { color: #cc7722; }
 .star-empty { text-align: center; font-size: 10px; color: #ccc; }
 
-/* 亮度颜色 */
 .b-m { color: #c0392b !important; }
 .b-w { color: #d4871a !important; }
 .b-d { color: #b8860b !important; }
 
-/* 四化 */
-.star-hua {
-  font-size: 8px; font-weight: bold;
-  line-height: 1; margin-left: 1px;
-}
+.star-hua { font-size: 8px; font-weight: bold; line-height: 1; margin-left: 1px; }
 .h-禄 { color: #cc0000; }
 .h-权 { color: #7b2d8e; }
 .h-科 { color: #1a6db5; }
 .h-忌 { color: #1a1a2e; }
 
-/* 辅煞星 */
-.cell-aux {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1px 3px;
-  padding-top: 1px;
-  border-top: 1px solid #ece4d4;
-  flex-shrink: 0;
-  line-height: 1.2;
-}
+.cell-aux { display: flex; flex-wrap: wrap; gap: 1px 3px; padding-top: 1px; border-top: 1px solid #ece4d4; flex-shrink: 0; line-height: 1.2; }
 .aux-n { font-size: 8px; color: #666; }
 .aux-s { font-size: 8px; color: #887a6a; }
 </style>
