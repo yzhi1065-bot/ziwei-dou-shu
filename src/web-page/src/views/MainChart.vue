@@ -22,9 +22,14 @@
 
       <!-- 主区：左盘右信息 -->
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        <!-- 左：SVG盘面 -->
+        <!-- 左：方盘 -->
         <div class="lg:col-span-3 scroll-panel rounded-lg p-4 flex justify-center">
-          <ZiweiPlate :palaces="chart.palaces" :size="500"
+          <ZiweiPlate :palaces="chart.palaces" :size="480"
+            :fourPillars="chart.fourPillars"
+            :elementPhase="chart.elementPhase"
+            :mingMaster="chart.mingMaster"
+            :shenMaster="chart.shenMaster"
+            :huaMap="huaMap"
             @select-palace="selectedPalace = $event"
             @select-star="selectedStar = $event" />
         </div>
@@ -86,7 +91,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useChartStore } from '../stores/chart'
 import { PALACE_NAMES } from '../../../core/types'
 import type { HuaType } from '../../../core/types'
@@ -99,13 +104,22 @@ const chart = chartStore.chartResult
 const selectedPalace = ref<number | null>(null)
 const selectedStar = ref<string | null>(null)
 
+const huaMap = computed<Record<string, HuaType>>(() => {
+  const map: Record<string, HuaType> = {}
+  if (chart.value) {
+    chart.value.hua.forEach(h => { map[h.starId] = h.type })
+  }
+  return map
+})
+
 function getStarName(id: string): string {
   return STAR_NAMES[id]?.nameCn || id
 }
 
 function getPalaceName(branchIndex: number): string {
-  // 简化：通过地支找宫名
-  const p = chart?.palaces.find(p => p.branchIndex === branchIndex)
+  const c = chart.value
+  if (!c) return ''
+  const p = c.palaces.find(p => p.branchIndex === branchIndex)
   return p?.name || ''
 }
 
