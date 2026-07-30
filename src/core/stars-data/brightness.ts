@@ -1,313 +1,80 @@
 /**
  * 庙旺落陷亮度对照表
- * 依据：《紫微斗数全书》卷三·诸星庙旺表
- * 参照：中州派庙旺落陷规则
  * 
- * 亮度等级（从高到低）：
- *   庙(wonderful) 旺(flourishing) 得地(proper) 利益(beneficial) 
- *   平和(flat) 不得地(improper) 落陷(fallen)
+ * 数据来源: iztro (MIT) - 经文墨天机/元亨利贞校验
+ *      https://github.com/SylarLong/iztro
  * 
- * 行索引：地支（子1~亥12）
- * 列索引：星曜ID
+ * 亮度等级对照：
+ *   iztro -> 中文
+ *   miao  -> 庙  (最亮)
+ *   wang  -> 旺  (明亮)
+ *   de    -> 得地 (适中)
+ *   li    -> 利益 (稍暗)
+ *   ping  -> 平和 (平常)
+ *   bu    -> 不得地 (不利)
+ *   xian  -> 落陷 (沦落)
+ * 
+ * 行索引：地支（子=0, 丑=1, ... 亥=11）0-indexed
+ *        使用时需+1转1-indexed
  */
 
 export type BrightnessLevel = 
-  | '庙'    // 星光最亮，吉星最吉，凶星不凶
-  | '旺'    // 光强，吉星得力，凶星减凶
-  | '得地'  // 光明，吉星有用，凶星稍凶
-  | '利益'  // 有利，吉星力弱，凶星为祸
-  | '平和'  // 平常，吉凶均不显
-  | '不得地' // 失力，吉星无力，凶星加凶
-  | '落陷'  // 沦落，吉星不吉，凶星大凶
+  | '庙' | '旺' | '得地' | '利益' | '平和' | '不得地' | '落陷'
 
-/** 亮度等级数值化（用于排序和计算） */
+const LEVEL_MAP: Record<string, BrightnessLevel> = {
+  'miao': '庙', 'wang': '旺', 'de': '得地',
+  'li': '利益', 'ping': '平和', 'bu': '不得地', 'xian': '落陷',
+}
+
+/** 亮度数值化 */
 export const BRIGHTNESS_VALUE: Record<BrightnessLevel, number> = {
-  '庙': 5,
-  '旺': 4,
-  '得地': 3,
-  '利益': 2,
-  '平和': 1,
-  '不得地': -1,
-  '落陷': -2
+  '庙': 5, '旺': 4, '得地': 3,
+  '利益': 2, '平和': 1, '不得地': -1, '落陷': -2,
 }
 
 /**
- * 星曜亮度表 [地支索引1~12][星曜ID]
- * 地支索引：1=子, 2=丑, 3=寅, 4=卯, 5=辰, 6=巳,
- *          7=午, 8=未, 9=申, 10=酉, 11=戌, 12=亥
- * null = 该星不在此宫
+ * 星曜亮度表 [地支索引0~11]
+ * 数据来自 iztro STARS_INFO
  */
-export const BRIGHTNESS_TABLE: Record<string, (BrightnessLevel | null)[]> = {
-  // ---- 14主星 ----
-  ziwei: [
-    '庙',    // 子
-    '旺',    // 丑
-    '得地',  // 寅
-    '旺',    // 卯
-    '得地',  // 辰
-    '旺',    // 巳
-    '庙',    // 午
-    '旺',    // 未
-    '得地',  // 申
-    '旺',    // 酉
-    '得地',  // 戌
-    '旺',    // 亥
-  ],
-  tianji: [
-    '得地',  // 子
-    '不得地', // 丑
-    '利益',  // 寅
-    '旺',    // 卯
-    '不得地', // 辰
-    '利益',  // 巳
-    '落陷',  // 午
-    '旺',    // 未
-    '利益',  // 申
-    '旺',    // 酉
-    '落陷',  // 戌
-    '平和',  // 亥
-  ],
-  taiyang: [
-    '落陷',  // 子
-    '落陷',  // 丑
-    '得地',  // 寅
-    '旺',    // 卯
-    '旺',    // 辰
-    '庙',    // 巳
-    '庙',    // 午
-    '庙',    // 未
-    '旺',    // 申
-    '得地',  // 酉
-    '落陷',  // 戌
-    '落陷',  // 亥
-  ],
-  wuqu: [
-    '旺',    // 子
-    '庙',    // 丑
-    '得地',  // 寅
-    '庙',    // 卯
-    '庙',    // 辰
-    '旺',    // 巳
-    '庙',    // 午
-    '得地',  // 未
-    '平',    // 申
-    '旺',    // 酉
-    '落陷',  // 戌
-    '得地',  // 亥
-  ],
-  tiantong: [
-    '庙',    // 子
-    '不得地', // 丑
-    '利益',  // 寅
-    '旺',    // 卯
-    '利益',  // 辰
-    '旺',    // 巳
-    '落陷',  // 午
-    '庙',    // 未
-    '旺',    // 申
-    '旺',    // 酉
-    '得地',  // 戌
-    '平和',  // 亥
-  ],
-  lianzhen: [
-    '旺',    // 子
-    '平和',  // 丑
-    '平和',  // 寅
-    '落陷',  // 卯
-    '利益',  // 辰
-    '庙',    // 巳
-    '庙',    // 午
-    '得地',  // 未
-    '利益',  // 申
-    '旺',    // 酉
-    '落陷',  // 戌
-    '旺',    // 亥
-  ],
-  tianfu: [
-    '庙',    // 子
-    '旺',    // 丑
-    '得地',  // 寅
-    '旺',    // 卯
-    '得地',  // 辰
-    '庙',    // 巳
-    '庙',    // 午
-    '旺',    // 未
-    '得地',  // 申
-    '旺',    // 酉
-    '得地',  // 戌
-    '庙',    // 亥
-  ],
-  taiyin: [
-    '庙',    // 子
-    '庙',    // 丑
-    '得地',  // 寅
-    '旺',    // 卯
-    '落陷',  // 辰
-    '利益',  // 巳
-    '落陷',  // 午
-    '庙',    // 未
-    '庙',    // 申
-    '旺',    // 酉
-    '得地',  // 戌
-    '平和',  // 亥
-  ],
-  tanlang: [
-    '旺',    // 子
-    '不得地', // 丑
-    '旺',    // 寅
-    '落陷',  // 卯
-    '庙',    // 辰
-    '得地',  // 巳
-    '落陷',  // 午
-    '旺',    // 未
-    '庙',    // 申
-    '旺',    // 酉
-    '落陷',  // 戌
-    '庙',    // 亥
-  ],
-  jumen: [
-    '庙',    // 子
-    '旺',    // 丑
-    '平和',  // 寅
-    '旺',    // 卯
-    '落陷',  // 辰
-    '旺',    // 巳
-    '庙',    // 午
-    '得地',  // 未
-    '利益',  // 申
-    '旺',    // 酉
-    '落陷',  // 戌
-    '平和',  // 亥
-  ],
-  tianxiang: [
-    '庙',    // 子
-    '得地',  // 丑
-    '得地',  // 寅
-    '平和',  // 卯
-    '庙',    // 辰
-    '庙',    // 巳
-    '落陷',  // 午
-    '得地',  // 未
-    '旺',    // 申
-    '平和',  // 酉
-    '庙',    // 戌
-    '旺',    // 亥
-  ],
-  tianliang: [
-    '庙',    // 子
-    '得地',  // 丑
-    '庙',    // 寅
-    '旺',    // 卯
-    '得地',  // 辰
-    '旺',    // 巳
-    '落陷',  // 午
-    '得地',  // 未
-    '庙',    // 申
-    '旺',    // 酉
-    '得地',  // 戌
-    '旺',    // 亥
-  ],
-  qisha: [
-    '旺',    // 子
-    '得地',  // 丑
-    '旺',    // 寅
-    '庙',    // 卯
-    '得地',  // 辰
-    '旺',    // 巳
-    '庙',    // 午
-    '得地',  // 未
-    '旺',    // 申
-    '庙',    // 酉
-    '落陷',  // 戌
-    '旺',    // 亥
-  ],
-  pojun: [
-    '庙',    // 子
-    '旺',    // 丑
-    '旺',    // 寅
-    '平和',  // 卯
-    '得地',  // 辰
-    '得地',  // 巳
-    '落陷',  // 午
-    '旺',    // 未
-    '庙',    // 申
-    '得地',  // 酉
-    '落陷',  // 戌
-    '旺',    // 亥
-  ],
-  // ---- 辅星 ----
-  zuobi: [
-    null, null, null, null, null, null, null, null, null, null, null, null
-  ],
-  youbi: [
-    null, null, null, null, null, null, null, null, null, null, null, null
-  ],
-  wenchang: [
-    '旺',    // 子
-    '庙',    // 丑
-    '得地',  // 寅
-    '旺',    // 卯
-    '庙',    // 辰
-    '旺',    // 巳
-    '落陷',  // 午
-    '平和',  // 未
-    '得地',  // 申
-    '旺',    // 酉
-    '庙',    // 戌
-    '得地',  // 亥
-  ],
-  wenqu: [
-    '旺',    // 子
-    '庙',    // 丑
-    '得地',  // 寅
-    '旺',    // 卯
-    '庙',    // 辰
-    '旺',    // 巳
-    '落陷',  // 午
-    '平和',  // 未
-    '得地',  // 申
-    '旺',    // 酉
-    '庙',    // 戌
-    '得地',  // 亥
-  ],
-  tiankui: [
-    null, null, null, null, null, null, null, null, null, null, null, null
-  ],
-  tianyue: [
-    null, null, null, null, null, null, null, null, null, null, null, null
-  ],
-  lucun: [
-    null, null, null, null, null, null, null, null, null, null, null, null
-  ],
-  tianma: [
-    null, null, null, null, null, null, null, null, null, null, null, null
-  ],
-  // ---- 煞星 ----
-  qingyang: [
-    null, null, null, null, null, null, null, null, null, null, null, null
-  ],
-  tuoluo: [
-    null, null, null, null, null, null, null, null, null, null, null, null
-  ],
-  huoxing: [
-    null, null, null, null, null, null, null, null, null, null, null, null
-  ],
-  lingxing: [
-    null, null, null, null, null, null, null, null, null, null, null, null
-  ],
-  dikong: [
-    null, null, null, null, null, null, null, null, null, null, null, null
-  ],
-  dijie: [
-    null, null, null, null, null, null, null, null, null, null, null, null
-  ],
+const IZTRO_BRIGHTNESS: Record<string, string[]> = {
+  ziwei:    ['wang','wang','de','wang','miao','miao','wang','wang','de','wang','ping','miao'],
+  tianji:   ['de','wang','li','ping','miao','xian','de','wang','li','ping','miao','xian'],
+  taiyang:  ['wang','miao','wang','wang','wang','de','de','xian','bu','xian','xian','bu'],
+  wuqu:     ['de','li','miao','ping','wang','miao','de','li','miao','ping','wang','miao'],
+  tiantong: ['li','ping','ping','miao','xian','bu','wang','ping','ping','miao','wang','bu'],
+  lianzhen: ['miao','ping','li','xian','ping','li','miao','ping','li','xian','ping','li'],
+  tianfu:   ['miao','de','miao','de','wang','miao','de','wang','miao','de','miao','miao'],
+  taiyin:   ['wang','xian','xian','xian','bu','bu','li','bu','wang','miao','miao','miao'],
+  tanlang:  ['ping','li','miao','xian','wang','miao','ping','li','miao','xian','wang','miao'],
+  jumen:    ['miao','miao','xian','wang','wang','bu','miao','miao','xian','wang','wang','bu'],
+  tianxiang:['miao','xian','de','de','miao','de','miao','xian','de','de','miao','miao'],
+  tianliang:['miao','miao','miao','xian','miao','wang','xian','de','miao','xian','miao','wang'],
+  qisha:    ['miao','wang','miao','ping','wang','miao','miao','miao','miao','ping','wang','miao'],
+  pojun:    ['de','xian','wang','ping','miao','wang','de','xian','wang','ping','miao','wang'],
+  wenchang: ['xian','li','de','miao','xian','li','de','miao','xian','li','de','miao'],
+  wenqu:    ['ping','wang','de','miao','xian','wang','de','miao','xian','wang','de','miao'],
+  zuobi:    ['de','miao','xian','li','de','miao','xian','li','de','miao','xian','li'],
+  youbi:    ['de','miao','xian','li','de','miao','xian','li','de','miao','xian','li'],
+  tiankui:  ['miao','wang','de','miao','xian','li','miao','wang','de','miao','xian','li'],
+  tianyue:  ['miao','wang','de','miao','xian','li','miao','wang','de','miao','xian','li'],
+  lucun:    ['miao','wang','de','miao','xian','li','miao','wang','de','miao','xian','li'],
+  qingyang: ['','xian','miao','','xian','miao','','xian','miao','','xian','miao'],
+  tuoluo:   ['xian','','miao','xian','','miao','xian','','miao','xian','','miao'],
+  huoxing:  ['miao','li','xian','de','miao','li','xian','de','miao','li','xian','de'],
+  lingxing: ['miao','li','xian','de','miao','li','xian','de','miao','li','xian','de'],
+  tianma:   ['xian','li','wang','miao','xian','li','wang','miao','xian','li','wang','miao'],
 }
 
-/** 获取星曜在指定地支的亮度 */
+/**
+ * 获取星曜在指定地支的亮度
+ * @param starId 星曜ID
+ * @param earthBranch 地支编号（1~12）
+ */
 export function getStarBrightness(starId: string, earthBranch: number): BrightnessLevel | null {
-  const table = BRIGHTNESS_TABLE[starId]
-  if (!table) return null
-  return table[earthBranch - 1] ?? null
+  const iztroIdx = ((earthBranch - 1) % 12 + 12) % 12  // 1-indexed -> 0-indexed
+  const raw = IZTRO_BRIGHTNESS[starId]?.[iztroIdx]
+  if (!raw) return null
+  return LEVEL_MAP[raw] ?? null
 }
 
 /** 获取亮度数值分数 */

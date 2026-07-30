@@ -287,19 +287,19 @@ describe('大限计算', () => {
 })
 
 describe('庙旺落陷', () => {
-  it('紫微在子庙旺', () => {
+  it('紫微在子旺', () => {
     const level = getStarBrightness('ziwei', 1) // 子在1
-    expect(level).toBe('庙')
+    expect(level).toBe('旺')
   })
 
-  it('太阳在午庙', () => {
+  it('太阳在午得地', () => {
     const level = getStarBrightness('taiyang', 7) // 午在7
-    expect(level).toBe('庙')
+    expect(level).toBe('得地')
   })
 
-  it('太阴在子庙', () => {
+  it('太阴在子旺', () => {
     const level = getStarBrightness('taiyin', 1)
-    expect(level).toBe('庙')
+    expect(level).toBe('旺')
   })
 })
 
@@ -371,6 +371,6 @@ describe('命主身主', () => {
   })
 
   it('身主 - 午年', () => {
-    expect(calcShenMaster(7)).toBe('铃星')
+    expect(calcShenMaster(7)).toBe('火星')
   })
 })
