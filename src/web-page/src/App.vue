@@ -13,6 +13,7 @@
         <router-link to="/" class="hover:text-jinbo transition-colors" active-class="text-jinbo">排盘</router-link>
         <router-link to="/chart" class="hover:text-jinbo transition-colors" active-class="text-jinbo">命盘</router-link>
         <router-link to="/fortune" class="hover:text-jinbo transition-colors" active-class="text-jinbo">运势</router-link>
+        <router-link to="/hepan" class="hover:text-jinbo transition-colors" active-class="text-jinbo">合盘</router-link>
         <router-link to="/knowledge" class="hover:text-jinbo transition-colors" active-class="text-jinbo">知识库</router-link>
       </div>
     </nav>

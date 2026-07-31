@@ -11,6 +11,7 @@ const router = createRouter({
     { path: '/chart', name: 'chart', component: () => import('./views/MainChart.vue') },
     { path: '/fortune', name: 'fortune', component: () => import('./views/FortunePages.vue') },
     { path: '/knowledge', name: 'knowledge', component: () => import('./views/KnowledgeBase.vue') },
+    { path: '/hepan', name: 'hepan', component: () => import('./views/HePan.vue') },
   ]
 })
 
