@@ -1,4 +1,4 @@
-<!-- 全功能方盘 v2：对齐文墨天机箭头/飞线标准 -->
+<!-- 全功能方盘 v3：细长箭头，外框=向外，内框(靠盘心)=向内 -->
 <template>
   <div class="zw-wrap" :style="{ width: (size+20)+'px' }">
     <div class="zw-box" :style="{ width: size+'px', height: size+'px' }">
@@ -28,21 +28,25 @@
         <!-- 宫位 -->
         <template v-else-if="c.p">
           <div v-if="c.s" class="zt">身</div>
-          <!-- 自化小箭头（四角，中层）：本命实心/大限空心/流年发光 -->
+
+          <!-- 自化细长箭头 -->
           <template v-if="showSelf">
-            <div v-for="sa in c.selfs" :key="'m'+sa.type" class="sa" :class="['sa-'+sa.type, sa.direction==='in' ? 'sa-in' : 'sa-out']"
-              :style="{ background: saColor[sa.type], border: '0.5px solid rgba(0,0,0,0.15)' }">
-              <span class="sa-label" v-if="mode==='letter'">{{ LETTER[sa.type] }}</span>
+            <!-- 向外箭头：贴宫格外框边，尖端朝外 -->
+            <div v-if="c.outArrows.length" class="sa-row" :class="'sa-row-'+c.outerDir">
+              <span v-for="a in c.outArrows" :key="'o'+a.type" class="sa" :class="['sa-'+a.type, 'sa-dir-'+c.outerDir, a.layer==='限'?'sa-hollow':a.layer==='流'?'sa-glow':'']"
+                :style="{ background: saColor[a.type] }">
+                <b v-if="mode==='letter'" class="sa-l">{{ LETTER[a.type] }}</b>
+              </span>
             </div>
-            <div v-for="sa in c.selfsDec" :key="'d'+sa.type" class="sa sa-hollow" :class="['sa-'+sa.type, sa.direction==='in' ? 'sa-in' : 'sa-out']"
-              :style="{ background: saColor[sa.type] }">
-              <span class="sa-label" v-if="mode==='letter'">{{ LETTER[sa.type] }}</span>
-            </div>
-            <div v-for="sa in c.selfsYr" :key="'y'+sa.type" class="sa sa-glow" :class="['sa-'+sa.type, sa.direction==='in' ? 'sa-in' : 'sa-out']"
-              :style="{ background: saColor[sa.type] }">
-              <span class="sa-label" v-if="mode==='letter'">{{ LETTER[sa.type] }}</span>
+            <!-- 向内箭头：贴宫格内框边（靠盘心），尖端朝盘心 -->
+            <div v-if="c.inArrows.length" class="sa-row" :class="'sa-row-in-'+c.innerDir">
+              <span v-for="a in c.inArrows" :key="'i'+a.type" class="sa" :class="['sa-'+a.type, 'sa-dir-'+c.innerDir, a.layer==='限'?'sa-hollow':a.layer==='流'?'sa-glow':'']"
+                :style="{ background: saColor[a.type] }">
+                <b v-if="mode==='letter'" class="sa-l">{{ LETTER[a.type] }}</b>
+              </span>
             </div>
           </template>
+
           <!-- 宫头 -->
           <div class="zh"><span class="zn">{{ c.p.name }}</span><span class="zg">{{ c.p.stem }}{{ c.p.branch }}</span></div>
           <!-- 主星+四化 -->
@@ -82,10 +86,9 @@ const props = defineProps<{
 }>()
 const emit = defineEmits(['sel'])
 
-// 文墨标准配色（全局统一）
+// 文墨标准配色
 const saColor: Record<string,string> = { '禄':'#27AE60', '权':'#8E44AD', '科':'#3498DB', '忌':'#E74C3C' }
 const LETTER: Record<string,string> = { '禄':'A', '权':'B', '科':'C', '忌':'D' }
-// 三层飞线样式：生年粗实线 / 大限虚线 / 流年细发光
 const FLY_STYLE: Record<string,any> = {
   '命': { w:2, dash:'', op:0.65, glow:false },
   '限': { w:1.5, dash:'6,3', op:0.6, glow:false },
@@ -99,41 +102,56 @@ const EG:Record<string,[number,number]> = {
 }
 const EI:Record<string,number> = Object.fromEntries(EB.map((k,i)=>[k,i]))
 
+// 每宫格的内/外方向（外=远离盘心，内=朝盘心）
+function getDirs(row:number, col:number): { outer:string; inner:string } {
+  // 第一行：上外下内；第四行：下外上内
+  if (row === 1) return { outer:'up', inner:'down' }
+  if (row === 4) return { outer:'down', inner:'up' }
+  // 中间两行：左列右内左外；右列左内右外
+  if (col === 1) return { outer:'left', inner:'right' }
+  if (col === 4) return { outer:'right', inner:'left' }
+  return { outer:'up', inner:'down' }
+}
+
+interface SA { type:string; direction:string; layer?:string }
+
 const cells = computed(() => {
-  const r:any[] = [{ k:'cc', r:'2/span 2', c2:'2/span 2', p:null, c:true, m:false, s:false, selfs:[], selfsDec:[], selfsYr:[], i:-1 }]
+  const r:any[] = [{ k:'cc', r:'2/span 2', c2:'2/span 2', p:null, c:true, m:false, s:false, outArrows:[], inArrows:[], i:-1, outerDir:'', innerDir:'' }]
   for (const [eb,[row,col]] of Object.entries(EG)) {
     const p = props.palaces?.find((p2:any) => p2.branch === eb) || null
     const bi = EI[eb]
-    const selfs = (props.selfArrows||[]).filter((sa:any) => sa.palaceBranch === bi)
-    const selfsDec = (props.showSelfDecade ? props.decadeSelfArrows||[] : []).filter((sa:any) => sa.palaceBranch === bi)
-    const selfsYr = (props.showSelfYearly ? props.yearlySelfArrows||[] : []).filter((sa:any) => sa.palaceBranch === bi)
-    r.push({ k:eb, r:String(row), c2:String(col), p, c:false, m:p?.name==='命宫', s:!!p?.isShen, selfs, selfsDec, selfsYr, i:bi })
+    const allSelf:SA[] = [
+      ...(props.selfArrows||[]).filter((a:any) => a.palaceBranch===bi).map((a:any)=>({type:a.type, direction:a.direction, layer:'命'})),
+      ...(props.showSelfDecade ? (props.decadeSelfArrows||[]) : []).filter((a:any) => a.palaceBranch===bi).map((a:any)=>({type:a.type, direction:a.direction, layer:'限'})),
+      ...(props.showSelfYearly ? (props.yearlySelfArrows||[]) : []).filter((a:any) => a.palaceBranch===bi).map((a:any)=>({type:a.type, direction:a.direction, layer:'流'})),
+    ]
+    const { outer, inner } = getDirs(row, col)
+    const outArrows = allSelf.filter((a:any) => a.direction === 'out')
+    const inArrows = allSelf.filter((a:any) => a.direction === 'in')
+    r.push({ k:eb, r:String(row), c2:String(col), p, c:false, m:p?.name==='命宫', s:!!p?.isShen,
+      outArrows, inArrows, outerDir:outer, innerDir:inner, i:bi })
   }
   return r
 })
 
-// === 飞线：合并三层 + 密度控制 ===
+// === 飞线 ===
 const corePalaces = ['命宫','财帛宫','官禄宫','迁移宫']
-const isCoreFrom = (fl:any) => {
-  const p = props.palaces?.find((p2:any) => p2.branchIndex === fl.fromBranch)
-  return p ? corePalaces.includes(p.name) : false
-}
 const allFlies = computed(() => {
   let r = [...(props.flyLines||[])]
   if (props.showDecade) r = [...r, ...(props.decadeFly||[])]
   if (props.showYearly) r = [...r, ...(props.yearlyFly||[])]
-  if (props.density === 'mini') r = r.filter(isCoreFrom)
+  if (props.density === 'mini') r = r.filter((fl:any) => {
+    const p = props.palaces?.find((p2:any) => p2.branchIndex === fl.fromBranch)
+    return p ? corePalaces.includes(p.name) : false
+  })
   return r
 })
-
-// SVG弧线路径
 const cc = (eb:string) => {
   const p = EG[eb]; if (!p) return null
   const s = props.size||600; const cw = s/4
   return { x:(p[1]-0.5)*cw, y:(p[0]-0.5)*cw }
 }
 const svgFlyPaths = computed(() => {
-  // 分组偏移（同起点终点多条线不重叠）
   const groups = new Map<string, number>()
   return allFlies.value.map((fl:any) => {
     const from = cc(EB[fl.fromBranch])
@@ -143,7 +161,6 @@ const svgFlyPaths = computed(() => {
     const n = groups.get(key) || 0
     groups.set(key, n+1)
     const off = (n - (groups.get(key)!-1)/2) * 6
-    // 三次贝塞尔弧线，中点为偏移点
     const mx = (from.x+to.x)/2 + off
     const my = (from.y+to.y)/2 + off
     const style = FLY_STYLE[fl.layer] || FLY_STYLE['命']
@@ -167,31 +184,39 @@ const bc = (s:any) => {
 .zw-wrap { display:flex; justify-content:center; }
 .zw-box { display:grid; grid-template-columns:repeat(4,1fr); grid-template-rows:repeat(4,1fr); gap:2px; background:#b8956a; border:3px solid #b8956a; padding:2px; position:relative; }
 .zw-svg { position:absolute; top:0; left:0; pointer-events:none; z-index:10; }
-.zw-c { background:#fcf8f0; border:1px solid #d4c5a9; cursor:pointer; display:flex; flex-direction:column; padding:3px 5px; position:relative; min-height:0; transition:background .15s; z-index:1; }
+.zw-c { background:#fcf8f0; border:1px solid #d4c5a9; cursor:pointer; display:flex; flex-direction:column; padding:3px 5px; position:relative; min-height:0; transition:background .15s; z-index:1; overflow:visible; }
 .zw-c:hover { background:#f8f0e0; }
 .zw-m { background:#fef6e0!important; border-color:#d4a017!important; border-width:2px!important; }
 .zw-s { border-color:#8aaa7a!important; border-width:2px!important; }
 .zw-cc { background:#efe4d0!important; border:none!important; cursor:default; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; z-index:1; }
 
-/* 自化箭头：12px，尖端方向=箭头指向
-   基础三角 polygon(0 0, 100% 0, 50% 100%) = 尖端朝下
-   rotate(180deg)=尖端朝上   rotate(0)=尖端朝下 */
-.sa { position:absolute; width:12px; height:12px; z-index:5; opacity:0.9; clip-path:polygon(0 0, 100% 0, 50% 100%); }
-/* 大限自化：透明度0.7区分 */
-.sa-hollow { opacity:0.7 !important; filter:saturate(0.9); }
-/* 流年自化：发光 */
-.sa-glow { opacity:0.8; box-shadow: 0 0 5px 1.5px currentColor; }
-/* === 上排两角（禄左上、权右上）：朝外=尖端朝上(宫格外)，朝内=尖端朝下(盘心) === */
-.sa-out.sa-禄 { top:-2px; left:-2px; transform:rotate(180deg); }
-.sa-out.sa-权 { top:-2px; right:-2px; transform:rotate(180deg); }
-.sa-in.sa-禄 { top:-2px; left:-2px; transform:rotate(0deg); }
-.sa-in.sa-权 { top:-2px; right:-2px; transform:rotate(0deg); }
-/* === 下排两角（科左下、忌右下）：朝外=尖端朝下(宫格外)，朝内=尖端朝上(盘心) === */
-.sa-out.sa-科 { bottom:-2px; left:-2px; transform:rotate(0deg); }
-.sa-out.sa-忌 { bottom:-2px; right:-2px; transform:rotate(0deg); }
-.sa-in.sa-科 { bottom:-2px; left:-2px; transform:rotate(180deg); }
-.sa-in.sa-忌 { bottom:-2px; right:-2px; transform:rotate(180deg); }
-.sa-label { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:6px; font-weight:bold; color:#fff; text-shadow:0 0 2px rgba(0,0,0,.5); }
+/* === 细长自化箭头 ===
+   细长形：宽4px 高14px 尖端朝上的三角
+   sa-dir-up=尖端朝上  down=朝下  left=朝左  right=朝右 */
+.sa-row { position:absolute; z-index:6; display:flex; gap:1px; align-items:center; }
+/* 外框边：尖端朝外 */
+.sa-row-up { top:-2px; left:50%; transform:translateX(-50%); }
+.sa-row-down { bottom:-2px; left:50%; transform:translateX(-50%); }
+.sa-row-left { left:-2px; top:50%; transform:translateY(-50%) rotate(90deg); }
+.sa-row-right { right:-2px; top:50%; transform:translateY(-50%) rotate(-90deg); }
+/* 内框边（靠盘心）：尖端朝盘心 */
+.sa-row-up.sa-inrow, .sa-row-up[class*="in"] {}
+.sa { display:block; width:4px; height:14px; clip-path:polygon(50% 0, 100% 100%, 0 100%); }
+/* 方向旋转（尖端指向） */
+.sa-dir-up { transform:rotate(0deg); }
+.sa-dir-down { transform:rotate(180deg); }
+.sa-dir-left { transform:rotate(-90deg); }
+.sa-dir-right { transform:rotate(90deg); }
+/* 大限：透明度0.7 */
+.sa-hollow { opacity:0.7; }
+/* 流年：发光 */
+.sa-glow { opacity:0.8; filter:drop-shadow(0 0 2px currentColor); }
+.sa-l { font-size:5px; color:#fff; font-weight:bold; text-shadow:0 0 2px rgba(0,0,0,.5); }
+/* 内框边箭头容器：贴宫格内侧朝向盘心 */
+.sa-row-in-up { top:3px; left:50%; transform:translateX(-50%); }
+.sa-row-in-down { bottom:3px; left:50%; transform:translateX(-50%); }
+.sa-row-in-left { left:3px; top:50%; transform:translateY(-50%) rotate(90deg); }
+.sa-row-in-right { right:3px; top:50%; transform:translateY(-50%) rotate(-90deg); }
 
 .zcc { display:flex; align-items:center; gap:1px; font-size:9px; line-height:1.4; }
 .zcl { color:#a09080; font-size:7px; white-space:nowrap; }
