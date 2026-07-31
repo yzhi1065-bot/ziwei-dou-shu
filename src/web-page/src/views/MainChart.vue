@@ -15,13 +15,13 @@
           :ep="chart.elementPhase" :mm="chart.mingMaster" :sm="chart.shenMaster" :gender="chart.gender" @sel="selIdx=$event"
           :selfArrows="chart.selfArrows" :decadeSelfArrows="chart.decadeSelfArrows" :yearlySelfArrows="chart.yearlySelfArrows"
           :flyLines="chart.flyLines" :decadeFly="chart.decadeFly" :yearlyFly="chart.yearlyFly"
-          :showSelf="store.arrowSettings.showSelf" :showFly="store.arrowSettings.showFly"
-          :showSelfDecade="store.arrowSettings.showSelfDecade" :showSelfYearly="store.arrowSettings.showSelfYearly"
-          :showDecade="store.arrowSettings.showDecade" :showYearly="store.arrowSettings.showYearly"
+          :showSelf="isFeixing && store.arrowSettings.showSelf" :showFly="isFeixing && store.arrowSettings.showFly"
+          :showSelfDecade="isFeixing && store.arrowSettings.showSelfDecade" :showSelfYearly="isFeixing && store.arrowSettings.showSelfYearly"
+          :showDecade="isFeixing && store.arrowSettings.showDecade" :showYearly="isFeixing && store.arrowSettings.showYearly"
           :mode="store.arrowSettings.mode" :density="store.arrowSettings.density" />
 
-        <!-- 四化图例说明 -->
-        <div class="scroll-panel rounded-lg p-3 mt-3 text-xs">
+        <!-- 四化图例说明（仅飞星派） -->
+        <div v-if="isFeixing" class="scroll-panel rounded-lg p-3 mt-3 text-xs">
           <div class="flex flex-wrap gap-3">
             <div v-for="l in legend" :key="l.t" class="flex items-center gap-1">
               <span class="inline-block w-3 h-3" :style="{ background: l.c, clipPath: 'polygon(0 0, 100% 0, 50% 100%)' }"></span>
@@ -45,6 +45,7 @@
             <option v-for="m in 12" :key="m" :value="m">{{ m }}月</option>
           </select>
           <input v-model.number="fd" class="w-10 text-center border rounded" placeholder="日" />
+          <template v-if="isFeixing">
           <span class="text-gray-300 mx-1">|</span>
           <button @click="store.arrowSettings.showSelf=!store.arrowSettings.showSelf" class="px-1 text-xs rounded"
             :class="store.arrowSettings.showSelf?'bg-green-100 text-green-700':'bg-gray-100 text-gray-400'">自化</button>
@@ -62,6 +63,7 @@
             {{ store.arrowSettings.mode==='color' ? '彩色' : 'ABCD' }}</button>
           <button @click="store.arrowSettings.density = store.arrowSettings.density==='full'?'mini':'full'" class="px-1 text-xs rounded bg-gray-100 text-gray-600">
             {{ store.arrowSettings.density==='full' ? '完整' : '精简' }}</button>
+          </template>
         </div>
 
         <!-- 宫位详情 -->
@@ -128,6 +130,8 @@ if (!store.chartResult) {
   if (winData) store.chartResult = winData
 }
 const chart = computed(() => store.chartResult)
+// 飞星派才显示飞线+自化箭头
+const isFeixing = computed(() => (chart.value?.school || 'sanhe') === 'feixing')
 const fp = computed(() => chart.value?.fourPillars)
 
 const selIdx = ref<number | null>(null)

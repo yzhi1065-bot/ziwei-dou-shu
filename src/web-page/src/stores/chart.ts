@@ -20,7 +20,7 @@ export const useChartStore = defineStore('chart', () => {
     try { savedRecords.value = JSON.parse(localStorage.getItem('zw_records') || '[]') } catch { savedRecords.value = [] }
   }
 
-  async function generateChart(year: number, month: number, day: number, hour: number, minute: number, gender: string = '男') {
+  async function generateChart(year: number, month: number, day: number, hour: number, minute: number, gender: string = '男', school: string = 'sanhe') {
     try {
       const iz = await import('iztro')
       // 浏览器打包后 iztro 导出在 default 对象里
@@ -184,7 +184,7 @@ export const useChartStore = defineStore('chart', () => {
       const result = {
         fourPillars: { year:(cd.yearly||['','']).join(''), month:(cd.monthly||['','']).join(''), day:(cd.daily||['','']).join(''), hour:(cd.hourly||['','']).join('') },
         elementPhase: a.fiveElementsClass||'', mingMaster: a.soul||'', shenMaster: a.body||'',
-        gender, solarDate: `${year}-${month}-${day}`, timeRange: a.timeRange||'',
+        gender, school, solarDate: `${year}-${month}-${day}`, timeRange: a.timeRange||'',
         sortedBranches: sorted.map((p:any) => EB.indexOf(p.earthlyBranch)),
         // 自化箭头 & 飞线 & 宫位
         selfArrows, decadeSelfArrows, yearlySelfArrows,
