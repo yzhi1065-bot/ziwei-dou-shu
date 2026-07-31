@@ -19,6 +19,20 @@
           :showSelfDecade="store.arrowSettings.showSelfDecade" :showSelfYearly="store.arrowSettings.showSelfYearly"
           :showDecade="store.arrowSettings.showDecade" :showYearly="store.arrowSettings.showYearly"
           :mode="store.arrowSettings.mode" :density="store.arrowSettings.density" />
+
+        <!-- 四化图例说明 -->
+        <div class="scroll-panel rounded-lg p-3 mt-3 text-xs">
+          <div class="flex flex-wrap gap-3">
+            <div v-for="l in legend" :key="l.t" class="flex items-center gap-1">
+              <span class="inline-block w-3 h-3" :style="{ background: l.c, clipPath: 'polygon(0 0, 100% 0, 50% 100%)' }"></span>
+              <span><b class="font-bold">{{ l.t }}·{{ l.name }}</b><span class="text-gray-500"> {{ l.meaning }}</span></span>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-3 mt-2 pt-2 border-t border-gray-200 text-gray-600">
+            <span><b class="text-gray-800">▲朝外</b>（尖端朝宫格外）= 离心 · 本宫自化 · 能量外散</span>
+            <span><b class="text-gray-800">▼朝内</b>（尖端朝盘心）= 向心 · 视同自化 · 外力灌入</span>
+          </div>
+        </div>
       </div>
       <div class="lg:col-span-2 space-y-2 text-xs">
         <!-- 时间流切换 -->
@@ -155,4 +169,12 @@ function saveChart() {
 }
 
 const iztroName = computed(() => chart.value?.elementPhase || '')
+
+// 四化图例
+const legend = [
+  { t: '禄', name: '自化禄', c: '#27AE60', meaning: '机遇·自得·留福' },
+  { t: '权', name: '自化权', c: '#8E44AD', meaning: '自主·要强·掌控' },
+  { t: '科', name: '自化科', c: '#3498DB', meaning: '化解·名声·美化' },
+  { t: '忌', name: '自化忌', c: '#E74C3C', meaning: '内耗·纠结·付出' },
+]
 </script>

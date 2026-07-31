@@ -173,23 +173,25 @@ const bc = (s:any) => {
 .zw-s { border-color:#8aaa7a!important; border-width:2px!important; }
 .zw-cc { background:#efe4d0!important; border:none!important; cursor:default; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; z-index:1; }
 
-/* 自化箭头 - 四角定位，尺寸=宫格6-8% */
-.sa { position:absolute; width:9px; height:9px; z-index:5; opacity:0.85; }
-/* 大限自化：实心+透明度0.7（与实心本命区分） */
+/* 自化箭头：12px，尖端方向=箭头指向
+   基础三角 polygon(0 0, 100% 0, 50% 100%) = 尖端朝下
+   rotate(180deg)=尖端朝上   rotate(0)=尖端朝下 */
+.sa { position:absolute; width:12px; height:12px; z-index:5; opacity:0.9; clip-path:polygon(0 0, 100% 0, 50% 100%); }
+/* 大限自化：透明度0.7区分 */
 .sa-hollow { opacity:0.7 !important; filter:saturate(0.9); }
-/* 流年自化：实心+发光 */
-.sa-glow { opacity:0.8; box-shadow: 0 0 4px 1px currentColor; }
-/* 离心：朝宫格外侧 */
-.sa-out.sa-禄 { top:1px; left:1px; clip-path:polygon(0 0, 100% 0, 50% 100%); }
-.sa-out.sa-权 { top:1px; right:1px; clip-path:polygon(0 0, 100% 0, 50% 100%); }
-.sa-out.sa-科 { bottom:1px; left:1px; clip-path:polygon(0 100%, 100% 100%, 50% 0); }
-.sa-out.sa-忌 { bottom:1px; right:1px; clip-path:polygon(0 100%, 100% 100%, 50% 0); }
-/* 向心：朝向盘中心 */
-.sa-in.sa-禄 { top:1px; left:1px; clip-path:polygon(50% 0, 100% 50%, 50% 100%); transform:rotate(-90deg); }
-.sa-in.sa-权 { top:1px; right:1px; clip-path:polygon(50% 0, 100% 50%, 50% 100%); transform:rotate(180deg); }
-.sa-in.sa-科 { bottom:1px; left:1px; clip-path:polygon(50% 0, 100% 50%, 50% 100%); transform:rotate(0deg); }
-.sa-in.sa-忌 { bottom:1px; right:1px; clip-path:polygon(50% 0, 100% 50%, 50% 100%); transform:rotate(90deg); }
-.sa-label { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:5px; font-weight:bold; color:#fff; }
+/* 流年自化：发光 */
+.sa-glow { opacity:0.8; box-shadow: 0 0 5px 1.5px currentColor; }
+/* === 上排两角（禄左上、权右上）：朝外=尖端朝上(宫格外)，朝内=尖端朝下(盘心) === */
+.sa-out.sa-禄 { top:-2px; left:-2px; transform:rotate(180deg); }
+.sa-out.sa-权 { top:-2px; right:-2px; transform:rotate(180deg); }
+.sa-in.sa-禄 { top:-2px; left:-2px; transform:rotate(0deg); }
+.sa-in.sa-权 { top:-2px; right:-2px; transform:rotate(0deg); }
+/* === 下排两角（科左下、忌右下）：朝外=尖端朝下(宫格外)，朝内=尖端朝上(盘心) === */
+.sa-out.sa-科 { bottom:-2px; left:-2px; transform:rotate(0deg); }
+.sa-out.sa-忌 { bottom:-2px; right:-2px; transform:rotate(0deg); }
+.sa-in.sa-科 { bottom:-2px; left:-2px; transform:rotate(180deg); }
+.sa-in.sa-忌 { bottom:-2px; right:-2px; transform:rotate(180deg); }
+.sa-label { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:6px; font-weight:bold; color:#fff; text-shadow:0 0 2px rgba(0,0,0,.5); }
 
 .zcc { display:flex; align-items:center; gap:1px; font-size:9px; line-height:1.4; }
 .zcl { color:#a09080; font-size:7px; white-space:nowrap; }
