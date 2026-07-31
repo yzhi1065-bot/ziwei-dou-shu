@@ -13,7 +13,7 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
       <div class="lg:col-span-3">
-        <ZiweiPlate :palaces="chart.palaces" :size="600" :fp="fp" :solarDate="chart.solarDate" :timeRange="chart.timeRange"
+        <ZiweiPlate :palaces="chart.palaces" :size="plateSize" :fp="fp" :solarDate="chart.solarDate" :timeRange="chart.timeRange"
           :ep="chart.elementPhase" :mm="chart.mingMaster" :sm="chart.shenMaster" :gender="chart.gender" @sel="selIdx=$event"
           :selfArrows="chart.selfArrows" :decadeSelfArrows="chart.decadeSelfArrows" :yearlySelfArrows="chart.yearlySelfArrows"
           :flyLines="chart.flyLines" :decadeFly="chart.decadeFly" :yearlyFly="chart.yearlyFly"
@@ -143,6 +143,15 @@ const store = useChartStore()
 const chart = computed(() => store.chartResult)
 // 飞星派才显示飞线+自化箭头
 const isFeixing = computed(() => (chart.value?.school || 'sanhe') === 'feixing')
+
+// 盘面尺寸自适应（移动端缩小，桌面600px）
+const plateSize = ref(600)
+function calcPlateSize() {
+  const w = window.innerWidth
+  plateSize.value = w < 480 ? Math.min(w - 32, 420) : w < 768 ? Math.min(w - 48, 560) : 600
+}
+calcPlateSize()
+window.addEventListener('resize', calcPlateSize)
 const fp = computed(() => chart.value?.fourPillars)
 
 const selIdx = ref<number | null>(null)

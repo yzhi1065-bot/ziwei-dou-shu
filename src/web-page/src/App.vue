@@ -9,7 +9,7 @@
           紫微斗数
         </router-link>
       </div>
-      <div class="flex gap-6 text-sm">
+      <div class="flex gap-3 md:gap-6 text-xs md:text-sm">
         <router-link to="/" class="hover:text-jinbo transition-colors" active-class="text-jinbo">排盘</router-link>
         <router-link to="/chart" class="hover:text-jinbo transition-colors" active-class="text-jinbo">命盘</router-link>
         <router-link to="/fortune" class="hover:text-jinbo transition-colors" active-class="text-jinbo">运势</router-link>
