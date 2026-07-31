@@ -1,21 +1,26 @@
-<!-- 全功能方盘 + 自化箭头 + 飞星四化连线 -->
+<!-- 全功能方盘 v2：对齐文墨天机箭头/飞线标准 -->
 <template>
   <div class="zw-wrap" :style="{ width: (size+20)+'px' }">
     <div class="zw-box" :style="{ width: size+'px', height: size+'px' }">
-      <!-- SVG层：飞星连线 -->
-      <svg class="zw-svg" :width="size" :height="size" v-if="showFly && flyLines.length">
-        <defs><marker id="ah" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#d4a017"/></marker></defs>
-        <line v-for="(l,i) in svgFlyLines" :key="i" :x1="l.x1" :y1="l.y1" :x2="l.x2" :y2="l.y2"
-          :stroke="l.color" :stroke-width="l.w" :stroke-dasharray="l.dash" opacity="0.6" marker-end="url(#ah)" />
+      <!-- 顶层SVG：跨宫飞线 -->
+      <svg class="zw-svg" :width="size" :height="size" v-if="showFly">
+        <defs>
+          <marker v-for="t in ['禄','权','科','忌']" :key="t" :id="'ah-'+t" markerWidth="7" markerHeight="6" refX="7" refY="3" orient="auto">
+            <path d="M0,0 L7,3 L0,6Z" :fill="saColor[t]" />
+          </marker>
+        </defs>
+        <path v-for="(l,i) in svgFlyPaths" :key="i" :d="l.d" fill="none"
+          :stroke="l.color" :stroke-width="l.w" :stroke-dasharray="l.dash" :opacity="l.op"
+          :marker-end="'url(#ah-'+l.type+')'" />
       </svg>
 
-      <div v-for="c in cells" :key="c.k" class="zw-c" :class="{ 'zw-m':c.m, 'zw-s':c.s, 'zw-cc':c.c, 'zw-h':c.h }"
-        :style="{ gridRow: c.r, gridColumn: c.c2 }" @click="onClick(c)">
+      <div v-for="c in cells" :key="c.k" class="zw-c" :class="{ 'zw-m':c.m, 'zw-s':c.s, 'zw-cc':c.c }"
+        :style="{ gridRow: c.r, gridColumn: c.c2 }" @click="c.p && emit('sel', c.p.branchIndex)">
 
         <!-- 中宫 -->
         <template v-if="c.c">
           <div class="zcc"><span class="zcl">四柱</span><b class="zcv">{{ fp?.year }} {{ fp?.month }} {{ fp?.day }} {{ fp?.hour }}时</b></div>
-          <div class="zcc"><span class="zcl">阳</span><b class="zcv">{{ solarDate }}</b><span class="zcl" style="margin-left:2px">时</span><b class="zcv">{{ timeRange }}</b></div>
+          <div class="zcc"><span class="zcl">阳</span><b class="zcv">{{ solarDate }}</b></div>
           <div class="zcc"><span class="zcl">局</span><b class="zcv">{{ ep }}</b><span class="zcl" style="margin-left:2px">性</span><b class="zcv">{{ gender }}</b></div>
           <div class="zcc"><span class="zcl">命</span><b class="zcv">{{ mm }}</b><span class="zcl" style="margin-left:2px">身</span><b class="zcv">{{ sm }}</b></div>
         </template>
@@ -23,9 +28,12 @@
         <!-- 宫位 -->
         <template v-else-if="c.p">
           <div v-if="c.s" class="zt">身</div>
-          <!-- 自化小箭头（四角） -->
+          <!-- 自化小箭头（四角，中层） -->
           <template v-if="showSelf">
-            <div v-for="sa in c.selfs" :key="sa.t" class="sa" :class="'sa-'+sa.t+'-'+sa.d" :style="{ background: saColor[sa.t] }"></div>
+            <div v-for="sa in c.selfs" :key="sa.t" class="sa" :class="['sa-'+sa.t, sa.d==='in' ? 'sa-in' : 'sa-out']"
+              :style="{ background: saColor[sa.t], border: '0.5px solid rgba(0,0,0,0.15)' }">
+              <span class="sa-label" v-if="mode==='letter'">{{ LETTER[sa.t] }}</span>
+            </div>
           </template>
           <!-- 宫头 -->
           <div class="zh"><span class="zn">{{ c.p.name }}</span><span class="zg">{{ c.p.stem }}{{ c.p.branch }}</span></div>
@@ -58,12 +66,21 @@ import { computed } from 'vue'
 const props = defineProps<{
   palaces:any[]; size?:number; fp?:any; solarDate?:string; timeRange?:string
   ep?:string; mm?:string; sm?:string; gender?:string
-  selfArrows?:any[]; flyLines?:any[]; showSelf?:boolean; showFly?:boolean
+  selfArrows?:any[]; flyLines?:any[]; decadeFly?:any[]; yearlyFly?:any[]
+  showSelf?:boolean; showFly?:boolean; showDecade?:boolean; showYearly?:boolean
+  mode?:string; density?:string
 }>()
 const emit = defineEmits(['sel'])
 
+// 文墨标准配色
 const saColor: Record<string,string> = { '禄':'#4CAF50', '权':'#9C27B0', '科':'#2196F3', '忌':'#F44336' }
-const FLY_STYLE: Record<string,any> = { '命':{color:'#555',w:2,dash:''}, '限':{color:'#FF8C00',w:2,dash:''}, '流':{color:'#FFD700',w:1.5,dash:'4,3'} }
+const LETTER: Record<string,string> = { '禄':'A', '权':'B', '科':'C', '忌':'D' }
+// 三层飞线样式
+const FLY_STYLE: Record<string,any> = {
+  '命': { w:2, dash:'', op:0.8 },
+  '限': { w:1.5, dash:'6,3', op:0.7 },
+  '流': { w:1, dash:'', op:0.9 },
+}
 
 const EB = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥']
 const EG:Record<string,[number,number]> = {
@@ -72,42 +89,59 @@ const EG:Record<string,[number,number]> = {
 }
 const EI:Record<string,number> = Object.fromEntries(EB.map((k,i)=>[k,i]))
 
-const hlBranches = computed<string[]>(() => hl.value)
-const hl = computed<string[]>(() => [])
-
 const cells = computed(() => {
-  const r:any[] = [{ k:'cc', r:'2/span 2', c2:'2/span 2', p:null, c:true, m:false, s:false, h:false, selfs:[], i:-1 }]
+  const r:any[] = [{ k:'cc', r:'2/span 2', c2:'2/span 2', p:null, c:true, m:false, s:false, selfs:[], i:-1 }]
   for (const [eb,[row,col]] of Object.entries(EG)) {
     const p = props.palaces?.find((p2:any) => p2.branch === eb) || null
     const bi = EI[eb]
     const selfs = (props.selfArrows||[]).filter((sa:any) => sa.palaceBranch === bi)
-    r.push({ k:eb, r:String(row), c2:String(col), p, c:false, m:p?.name==='命宫', s:!!p?.isShen, h:hl.value.includes(eb), selfs, i:bi })
+    r.push({ k:eb, r:String(row), c2:String(col), p, c:false, m:p?.name==='命宫', s:!!p?.isShen, selfs, i:bi })
   }
   return r
 })
 
-// SVG飞线坐标
+// === 飞线：合并三层 + 密度控制 ===
+const corePalaces = ['命宫','财帛宫','官禄宫','迁移宫']
+const isCoreFrom = (fl:any) => {
+  const p = props.palaces?.find((p2:any) => p2.branchIndex === fl.fromBranch)
+  return p ? corePalaces.includes(p.name) : false
+}
+const allFlies = computed(() => {
+  let r = [...(props.flyLines||[])]
+  if (props.showDecade) r = [...r, ...(props.decadeFly||[])]
+  if (props.showYearly) r = [...r, ...(props.yearlyFly||[])]
+  if (props.density === 'mini') r = r.filter(isCoreFrom)
+  return r
+})
+
+// SVG弧线路径
 const cc = (eb:string) => {
   const p = EG[eb]; if (!p) return null
   const s = props.size||600; const cw = s/4
   return { x:(p[1]-0.5)*cw, y:(p[0]-0.5)*cw }
 }
-// 三层飞线
-const allFlyLines = computed(() => {
-  const r = [...(props.flyLines||[])]
-  return r
-})
-const svgFlyLines = computed(() => {
-  return allFlyLines.value.map((fl:any) => {
+const svgFlyPaths = computed(() => {
+  // 分组偏移（同起点终点多条线不重叠）
+  const groups = new Map<string, number>()
+  return allFlies.value.map((fl:any) => {
     const from = cc(EB[fl.fromBranch])
     const to = cc(EB[fl.toBranch])
     if (!from || !to) return null
+    const key = `${fl.fromBranch}-${fl.toBranch}`
+    const n = groups.get(key) || 0
+    groups.set(key, n+1)
+    const off = (n - (groups.get(key)!-1)/2) * 6
+    // 三次贝塞尔弧线，中点为偏移点
+    const mx = (from.x+to.x)/2 + off
+    const my = (from.y+to.y)/2 + off
     const style = FLY_STYLE[fl.layer] || FLY_STYLE['命']
-    return { x1:from.x, y1:from.y, x2:to.x, y2:to.y, color:style.color, w:style.w, dash:style.dash }
+    return {
+      d: `M${from.x},${from.y} Q${mx},${my} ${to.x},${to.y}`,
+      color: saColor[fl.type] || '#999',
+      w: style.w, dash: style.dash, op: style.op, type: fl.type,
+    }
   }).filter(Boolean)
 })
-
-const onClick = (c:any) => { if (c.p) emit('sel', c.branchIndex||0) }
 
 const bc = (s:any) => {
   if (s.brightness==='庙') return 'b-m'
@@ -120,29 +154,31 @@ const bc = (s:any) => {
 <style scoped>
 .zw-wrap { display:flex; justify-content:center; }
 .zw-box { display:grid; grid-template-columns:repeat(4,1fr); grid-template-rows:repeat(4,1fr); gap:2px; background:#b8956a; border:3px solid #b8956a; padding:2px; position:relative; }
-.zw-svg { position:absolute; top:0; left:0; pointer-events:none; z-index:5; }
-.zw-c { background:#fcf8f0; border:1px solid #d4c5a9; cursor:pointer; display:flex; flex-direction:column; padding:3px 5px; position:relative; min-height:0; transition:background .15s; }
+.zw-svg { position:absolute; top:0; left:0; pointer-events:none; z-index:10; }
+.zw-c { background:#fcf8f0; border:1px solid #d4c5a9; cursor:pointer; display:flex; flex-direction:column; padding:3px 5px; position:relative; min-height:0; transition:background .15s; z-index:1; }
 .zw-c:hover { background:#f8f0e0; }
 .zw-m { background:#fef6e0!important; border-color:#d4a017!important; border-width:2px!important; }
 .zw-s { border-color:#8aaa7a!important; border-width:2px!important; }
-.zw-cc { background:#efe4d0!important; border:none!important; cursor:default; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; }
-.zw-h { background:#fff8e8!important; border-color:#d4a017!important; box-shadow:inset 0 0 12px rgba(212,160,23,.15)!important; }
+.zw-cc { background:#efe4d0!important; border:none!important; cursor:default; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; z-index:1; }
 
-/* 自化小箭头 */
-.sa { position:absolute; width:6px; height:6px; z-index:3; border-radius:1px; }
-.sa-禄-out { top:0; left:0; clip-path:polygon(0 0, 100% 0, 50% 100%); }
-.sa-权-out { top:0; right:0; clip-path:polygon(0 0, 100% 0, 50% 100%); }
-.sa-科-out { bottom:0; left:0; clip-path:polygon(0 100%, 100% 100%, 50% 0); }
-.sa-忌-out { bottom:0; right:0; clip-path:polygon(0 100%, 100% 100%, 50% 0); }
-.sa-禄-in { top:0; left:0; clip-path:polygon(50% 0, 100% 50%, 50% 100%); }
-.sa-权-in { top:0; right:0; clip-path:polygon(50% 0, 100% 50%, 50% 100%); transform:rotate(90deg); }
-.sa-科-in { bottom:0; left:0; clip-path:polygon(50% 0, 100% 50%, 50% 100%); transform:rotate(-90deg); }
-.sa-忌-in { bottom:0; right:0; clip-path:polygon(50% 0, 100% 50%, 50% 100%); transform:rotate(180deg); }
+/* 自化箭头 - 四角定位，尺寸=宫格6-8% */
+.sa { position:absolute; width:9px; height:9px; z-index:5; opacity:0.85; }
+/* 离心：朝宫格外侧 */
+.sa-out.sa-禄 { top:1px; left:1px; clip-path:polygon(0 0, 100% 0, 50% 100%); }
+.sa-out.sa-权 { top:1px; right:1px; clip-path:polygon(0 0, 100% 0, 50% 100%); }
+.sa-out.sa-科 { bottom:1px; left:1px; clip-path:polygon(0 100%, 100% 100%, 50% 0); }
+.sa-out.sa-忌 { bottom:1px; right:1px; clip-path:polygon(0 100%, 100% 100%, 50% 0); }
+/* 向心：朝向盘中心 */
+.sa-in.sa-禄 { top:1px; left:1px; clip-path:polygon(50% 0, 100% 50%, 50% 100%); transform:rotate(-90deg); }
+.sa-in.sa-权 { top:1px; right:1px; clip-path:polygon(50% 0, 100% 50%, 50% 100%); transform:rotate(180deg); }
+.sa-in.sa-科 { bottom:1px; left:1px; clip-path:polygon(50% 0, 100% 50%, 50% 100%); transform:rotate(0deg); }
+.sa-in.sa-忌 { bottom:1px; right:1px; clip-path:polygon(50% 0, 100% 50%, 50% 100%); transform:rotate(90deg); }
+.sa-label { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:5px; font-weight:bold; color:#fff; }
 
 .zcc { display:flex; align-items:center; gap:1px; font-size:9px; line-height:1.4; }
 .zcl { color:#a09080; font-size:7px; white-space:nowrap; }
 .zcv { color:#5a3e2b; font-weight:bold; font-size:9px; white-space:nowrap; }
-.zt { position:absolute; left:-1px; top:50%; transform:translateY(-50%); writing-mode:vertical-rl; font-size:9px; color:#6b8e8e; font-weight:bold; z-index:2; }
+.zt { position:absolute; left:-1px; top:50%; transform:translateY(-50%); writing-mode:vertical-rl; font-size:9px; color:#6b8e8e; font-weight:bold; z-index:3; }
 .zh { display:flex; justify-content:space-between; border-bottom:1px solid #e8e0d0; padding-bottom:1px; flex-shrink:0; }
 .zn { font-size:11px; font-weight:bold; color:#6b4226; }
 .zg { font-size:8px; color:#a09080; }

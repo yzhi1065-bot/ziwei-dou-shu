@@ -9,7 +9,10 @@ export const useChartStore = defineStore('chart', () => {
   const savedRecords = ref<any[]>([])
   // 箭头设置
   const arrowSettings = ref({
-    showSelf: true, showFly: true, showDecade: true, showYearly: true, mode: 'color' as 'color'|'letter'
+    showSelf: true, showFly: true,
+    showDecade: true, showYearly: true,
+    mode: 'color' as 'color'|'letter',
+    density: 'full' as 'full'|'mini',
   })
 
   function loadRecords() {
@@ -18,7 +21,9 @@ export const useChartStore = defineStore('chart', () => {
 
   async function generateChart(year: number, month: number, day: number, hour: number, minute: number, gender: string = '男') {
     try {
-      const { astro } = await import('iztro')
+      const iz = await import('iztro')
+      // 浏览器打包后 iztro 导出在 default 对象里
+      const astro = (iz as any).default?.astro || (iz as any).astro
       const a = astro.bySolar(`${year}-${month}-${day}`, hour, gender==='男'?'男':'女', true, 'zh-CN')
       rawAstrolabe.value = a
 
@@ -27,75 +32,110 @@ export const useChartStore = defineStore('chart', () => {
 
       // === 提取自化信息 ===
       const selfArrows:any[] = []
+      const MUTAGEN_TYPES = ['禄','权','科','忌']
       a.palaces.forEach((p:any) => {
-        const stem = p.heavenlyStem
-        if (!stem) return
-        const MUTAGEN_TYPES = ['禄','权','科','忌']
-        MUTAGEN_TYPES.forEach((mt, mi) => {
+        const bi = EB.indexOf(p.earthlyBranch)
+        MUTAGEN_TYPES.forEach((mt) => {
           try {
-            if (p.selfMutaged([mt])) {
-              const star = p.majorStars?.[0]?.name || p.minorStars?.[0]?.name || ''
-              // 判断方向：星在本宫→离心，在对宫→向心
-              const inThisPalace = p.has([star]) 
-              selfArrows.push({
-                palaceBranch: EB.indexOf(p.earthlyBranch),
-                type: mt, idx: mi,
-                direction: inThisPalace ? 'out' : 'in',
-                starName: star
-              })
+            if (p.selfMutaged?.([mt])) {
+              // 方向: 星在本宫→离心out, 星在对宫→向心in
+              // 用mutagen反向查星名
+              let starName = ''
+              const hsTable: Record<string,string[]> = {
+                '甲':['廉贞','破军','武曲','太阳'], '乙':['天机','天梁','紫微','太阴'],
+                '丙':['天同','天机','文昌','廉贞'], '丁':['太阴','天同','天机','巨门'],
+                '戊':['贪狼','太阴','右弼','天机'], '己':['武曲','贪狼','天梁','文曲'],
+                '庚':['太阳','武曲','太阴','天同'], '辛':['巨门','太阳','文曲','文昌'],
+                '壬':['天梁','紫微','左辅','武曲'], '癸':['破军','巨门','太阴','贪狼'],
+              }
+              const idx = MUTAGEN_TYPES.indexOf(mt)
+              const entry = Object.entries(hsTable).find(([k]) => p.heavenlyStem === k)
+              if (entry) starName = entry[1][idx]
+              
+              // 该星在本宫还是对宫？
+              let direction = 'out'
+              if (starName) {
+                const allHere = [...(p.majorStars||[]), ...(p.minorStars||[])].some((s:any) => s.name === starName)
+                if (!allHere) direction = 'in'
+              }
+              selfArrows.push({ palaceBranch: bi, type: mt, direction, starName })
             }
           } catch {}
         })
       })
 
-      // === 提取飞星四化连线（本命）===
+      // === 飞星四化连线（每宫天干四化 → 目标宫）===
       const flyLines:any[] = []
+      const hsTableCN: Record<string,string[]> = {
+        '甲':['廉贞','破军','武曲','太阳'], '乙':['天机','天梁','紫微','太阴'],
+        '丙':['天同','天机','文昌','廉贞'], '丁':['太阴','天同','天机','巨门'],
+        '戊':['贪狼','太阴','右弼','天机'], '己':['武曲','贪狼','天梁','文曲'],
+        '庚':['太阳','武曲','太阴','天同'], '辛':['巨门','太阳','文曲','文昌'],
+        '壬':['天梁','紫微','左辅','武曲'], '癸':['破军','巨门','太阴','贪狼'],
+      }
       a.palaces.forEach((p:any) => {
-        try {
-          const targets = p.mutagedPlaces?.() || []
-          targets.forEach((tp:any) => {
-            const fromBranch = EB.indexOf(p.earthlyBranch)
-            const toBranch = EB.indexOf(tp.earthlyBranch)
-            if (fromBranch >= 0 && toBranch >= 0 && fromBranch !== toBranch) {
-              flyLines.push({
-                fromBranch, toBranch, layer: '命',
-                type: '', // 需要从 heavenlyStems 反查
-              })
-            }
-          })
-        } catch {}
-      })
-
-      // 给飞线标注四化类型
-      const MUTAGEN_NAMES = ['禄','权','科','忌']
-      flyLines.forEach((fl:any) => {
-        const fromPalace = a.palaces.find((p:any) => EB.indexOf(p.earthlyBranch) === fl.fromBranch)
-        const toPalace = a.palaces.find((p:any) => EB.indexOf(p.earthlyBranch) === fl.toBranch)
-        if (fromPalace && toPalace) {
-          // 查这个天干的四化哪颗星落在toPalace
-          const stems = (fromPalace.heavenlyStem || '').toLowerCase()
-          const hsTable: Record<string,string[]> = {
-            'jia':['lianzhenMaj','pojunMaj','wuquMaj','taiyangMaj'],
-            'yi':['tianjiMaj','tianliangMaj','ziweiMaj','taiyinMaj'],
-            'bing':['tiantongMaj','tianjiMaj','wenchangMin','lianzhenMaj'],
-            'ding':['taiyinMaj','tiantongMaj','tianjiMaj','jumenMaj'],
-            'wu':['tanlangMaj','taiyinMaj','youbiMin','tianjiMaj'],
-            'ji':['wuquMaj','tanlangMaj','tianliangMaj','wenquMin'],
-            'geng':['taiyangMaj','wuquMaj','taiyinMaj','tiantongMaj'],
-            'xin':['jumenMaj','taiyangMaj','wenquMin','wenchangMin'],
-            'ren':['tianliangMaj','ziweiMaj','zuofuMin','wuquMaj'],
-            'gui':['pojunMaj','jumenMaj','taiyinMaj','tanlangMaj'],
-          }
-          const entry = Object.entries(hsTable).find(([k]) => fromPalace.heavenlyStem?.toLowerCase().includes(k))
-          if (entry) {
-            entry[1].forEach((starId, si) => {
-              // 检查toPalace是否有这个星
-              const allStars = [...(toPalace.majorStars||[]), ...(toPalace.minorStars||[]), ...(toPalace.adjectiveStars||[])]
-              if (allStars.some((s:any) => s.name?.toLowerCase().includes(starId.replace('Maj','').replace('Min','')))) {
-                fl.type = MUTAGEN_NAMES[si]
-              }
+        const fromBi = EB.indexOf(p.earthlyBranch)
+        const stars4 = hsTableCN[p.heavenlyStem] || []
+        stars4.forEach((starName:string, si:number) => {
+          const target = a.palaces.find((pp:any) =>
+            [...(pp.majorStars||[]), ...(pp.minorStars||[])].some((s:any) => s.name === starName)
+          )
+          if (target && target !== p) {
+            flyLines.push({
+              fromBranch: fromBi,
+              toBranch: EB.indexOf(target.earthlyBranch),
+              type: MUTAGEN_TYPES[si],
+              layer: '命',
             })
           }
+        })
+      })
+      // 去重(同起点终点同类型)
+      const seen = new Set<string>()
+      const uniqueFly = flyLines.filter((fl:any) => {
+        const k = `${fl.fromBranch}-${fl.toBranch}-${fl.type}`
+        if (seen.has(k)) return false
+        seen.add(k)
+        return true
+      })
+
+      // === 大限四化飞线（当前大限宫干）===
+      const decadeFly:any[] = []
+      const age = new Date().getFullYear() - year + 1
+      a.palaces.forEach((p:any) => {
+        if (!p.decadal) return
+        const [s,e] = p.decadal.range
+        if (age < s || age > e) return
+        const fromBi = EB.indexOf(p.earthlyBranch)
+        const stars4 = hsTableCN[p.decadal.heavenlyStem] || []
+        stars4.forEach((starName:string, si:number) => {
+          const target = a.palaces.find((pp:any) =>
+            [...(pp.majorStars||[]), ...(pp.minorStars||[])].some((s:any) => s.name === starName)
+          )
+          if (target && target !== p) {
+            decadeFly.push({
+              fromBranch: fromBi, toBranch: EB.indexOf(target.earthlyBranch),
+              type: MUTAGEN_TYPES[si], layer: '限',
+            })
+          }
+        })
+      })
+
+      // === 流年四化飞线（当年流年天干）===
+      const yearlyFly:any[] = []
+      const now = new Date()
+      const ystem = EB.length ? getYearStem(now.getFullYear()) : ''
+      const starsY = hsTableCN[ystem] || []
+      starsY.forEach((starName:string, si:number) => {
+        const target = a.palaces.find((pp:any) =>
+          [...(pp.majorStars||[]), ...(pp.minorStars||[])].some((s:any) => s.name === starName)
+        )
+        if (target) {
+          yearlyFly.push({
+            fromBranch: EB.indexOf('寅'), // 流年四化从流年命宫起，简化为寅宫（流年正月）
+            toBranch: EB.indexOf(target.earthlyBranch),
+            type: MUTAGEN_TYPES[si], layer: '流',
+          })
         }
       })
 
@@ -105,7 +145,7 @@ export const useChartStore = defineStore('chart', () => {
         gender, solarDate: `${year}-${month}-${day}`, timeRange: a.timeRange||'',
         sortedBranches: sorted.map((p:any) => EB.indexOf(p.earthlyBranch)),
         // 自化箭头 & 飞线 & 宫位
-        selfArrows, flyLines,
+        selfArrows, flyLines: uniqueFly, decadeFly, yearlyFly,
         palaces: sorted.map((p:any) => {
           const op = a.palaces.find((op2:any) => op2.earthlyBranch === p.earthlyBranch)
           const selfTypes = selfArrows.filter((sa:any) => sa.palaceBranch === EB.indexOf(p.earthlyBranch)).map((sa:any) => sa.type)
@@ -142,3 +182,9 @@ export const useChartStore = defineStore('chart', () => {
 
   return { chartResult, rawAstrolabe, savedRecords, arrowSettings, generateChart, loadRecords }
 })
+
+// 年干计算
+const STEMS = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸']
+function getYearStem(year: number): string {
+  return STEMS[((year - 4) % 10 + 10) % 10]
+}

@@ -13,8 +13,10 @@
       <div class="lg:col-span-3">
         <ZiweiPlate :palaces="chart.palaces" :size="600" :fp="fp" :solarDate="chart.solarDate" :timeRange="chart.timeRange"
           :ep="chart.elementPhase" :mm="chart.mingMaster" :sm="chart.shenMaster" :gender="chart.gender" @sel="selIdx=$event"
-          :selfArrows="chart.selfArrows" :flyLines="chart.flyLines"
-          :showSelf="store.arrowSettings.showSelf" :showFly="store.arrowSettings.showFly" />
+          :selfArrows="chart.selfArrows" :flyLines="chart.flyLines" :decadeFly="chart.decadeFly" :yearlyFly="chart.yearlyFly"
+          :showSelf="store.arrowSettings.showSelf" :showFly="store.arrowSettings.showFly"
+          :showDecade="store.arrowSettings.showDecade" :showYearly="store.arrowSettings.showYearly"
+          :mode="store.arrowSettings.mode" :density="store.arrowSettings.density" />
       </div>
       <div class="lg:col-span-2 space-y-2 text-xs">
         <!-- 时间流切换 -->
@@ -32,6 +34,14 @@
             :class="store.arrowSettings.showSelf?'bg-green-100 text-green-700':'bg-gray-100 text-gray-400'">自化</button>
           <button @click="store.arrowSettings.showFly=!store.arrowSettings.showFly" class="px-1 text-xs rounded"
             :class="store.arrowSettings.showFly?'bg-purple-100 text-purple-700':'bg-gray-100 text-gray-400'">飞星</button>
+          <button @click="store.arrowSettings.showDecade=!store.arrowSettings.showDecade" class="px-1 text-xs rounded"
+            :class="store.arrowSettings.showDecade?'bg-orange-100 text-orange-700':'bg-gray-100 text-gray-400'">大限</button>
+          <button @click="store.arrowSettings.showYearly=!store.arrowSettings.showYearly" class="px-1 text-xs rounded"
+            :class="store.arrowSettings.showYearly?'bg-yellow-100 text-yellow-700':'bg-gray-100 text-gray-400'">流年</button>
+          <button @click="store.arrowSettings.mode = store.arrowSettings.mode==='color'?'letter':'color'" class="px-1 text-xs rounded bg-blue-50 text-blue-700">
+            {{ store.arrowSettings.mode==='color' ? '彩色' : 'ABCD' }}</button>
+          <button @click="store.arrowSettings.density = store.arrowSettings.density==='full'?'mini':'full'" class="px-1 text-xs rounded bg-gray-100 text-gray-600">
+            {{ store.arrowSettings.density==='full' ? '完整' : '精简' }}</button>
         </div>
 
         <!-- 宫位详情 -->
@@ -91,7 +101,12 @@ import { useChartStore } from '../stores/chart'
 import ZiweiPlate from '../components/ZiweiPlate.vue'
 
 const store = useChartStore()
-if ((window as any).__CHART_DATA) store.chartResult = (window as any).__CHART_DATA
+// 优先用store里的最新数据（generateChart已填充selfArrows/flyLines）
+// 只有store为空时才从window读取（防止旧数据覆盖新数据）
+if (!store.chartResult) {
+  const winData = (window as any).__CHART_DATA
+  if (winData) store.chartResult = winData
+}
 const chart = computed(() => store.chartResult)
 const fp = computed(() => chart.value?.fourPillars)
 
