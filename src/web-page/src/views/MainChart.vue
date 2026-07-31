@@ -20,6 +20,17 @@
           :showDecade="isFeixing && store.arrowSettings.showDecade" :showYearly="isFeixing && store.arrowSettings.showYearly"
           :mode="store.arrowSettings.mode" :density="store.arrowSettings.density" />
 
+        <!-- 命格局 -->
+        <div class="scroll-panel rounded-lg p-3 mt-3" v-if="chart.patterns && chart.patterns.length">
+          <h3 class="font-bold text-sm mb-2">命格局</h3>
+          <div class="flex flex-wrap gap-2">
+            <div v-for="(p,i) in chart.patterns" :key="i" class="bg-zheshi/10 border border-zheshi/30 rounded px-2 py-1 text-xs">
+              <b class="text-zheshi">{{ p.name }}</b>
+              <span class="text-gray-600 ml-1">{{ p.description }}</span>
+            </div>
+          </div>
+        </div>
+
         <!-- 四化图例说明 -->
         <div class="scroll-panel rounded-lg p-3 mt-3 text-xs">
           <div class="flex flex-wrap gap-3">

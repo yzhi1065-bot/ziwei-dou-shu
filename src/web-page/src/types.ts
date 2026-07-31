@@ -75,6 +75,8 @@ export interface ChartDisplayData {
   flyLines: FlyLine[]
   decadeFly: FlyLine[]
   yearlyFly: FlyLine[]
+  /** 命格局检测结果 */
+  patterns?: { name: string; description: string }[]
   palaces: PalaceDisplay[]
 }
 

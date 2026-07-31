@@ -168,6 +168,27 @@ function getYearStem(year: number): string {
   return STEMS[((year - 4) % 10 + 10) % 10]
 }
 
+/**
+ * 从生辰检测命格局（直接调自研core，农历已与iztro同源）
+ */
+export async function detectPatternsFromAstrolabe(
+  _astrolabe: any,
+  birth: { year: number; month: number; day: number; hour: number; gender: string; school: string }
+): Promise<{ name: string; description: string }[]> {
+  try {
+    const { createChart } = await import('@core/chart')
+    const chart = createChart({
+      year: birth.year, month: birth.month, day: birth.day,
+      hour: birth.hour, minute: 0,
+      gender: birth.gender as any, school: birth.school as any,
+    })
+    return (chart.patterns || []).map((p: any) => ({ name: p.name, description: p.description }))
+  } catch (e) {
+    console.warn('格局检测失败:', e)
+    return []
+  }
+}
+
 export const useChartStore = defineStore('chart', () => {
   const chartResult = ref<ChartDisplayData | null>(null)
   const rawAstrolabe = ref<any>(null)
@@ -245,6 +266,8 @@ export const useChartStore = defineStore('chart', () => {
         gender, school, solarDate: `${year}-${month}-${day}`, timeRange: a.timeRange||'',
         selfArrows, decadeSelfArrows, yearlySelfArrows,
         flyLines, decadeFly, yearlyFly,
+        // 格局检测（自研core算法，农历已与iztro同源）
+        patterns: await detectPatternsFromAstrolabe(a, { year, month, day, hour, gender, school }),
         palaces: sorted.map((p:any) => ({
           name: p.name, stem: p.heavenlyStem||'', branch: p.earthlyBranch||'',
           branchIndex: EB.indexOf(p.earthlyBranch), isShen: p.isBodyPalace||false,

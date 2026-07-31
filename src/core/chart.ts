@@ -195,6 +195,7 @@ export function createChart(input: ChartInput): ChartResult {
     shenMaster,
     hua: huaRecords,
     greatLimits,
+    patterns,
   }
 }
 
