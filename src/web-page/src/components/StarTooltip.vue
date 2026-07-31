@@ -19,8 +19,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { MAIN_STARS } from '../../../core/stars-data/main-stars'
-import type { MainStarData } from '../../../core/stars-data/main-stars'
+import { MAIN_STARS } from '@core/stars-data/main-stars'
+import type { MainStarData } from '@core/stars-data/main-stars'
 
 const props = defineProps<{
   starId: string | null

@@ -99,7 +99,7 @@
 import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useChartStore } from '../stores/chart'
-import type { Gender, School } from '../../../core/types'
+import type { Gender, School } from '@core/types'
 
 const router = useRouter()
 const chartStore = useChartStore()

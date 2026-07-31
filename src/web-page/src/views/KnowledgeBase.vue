@@ -97,9 +97,11 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { MAIN_STARS, getAllMainStars } from '../../../core/stars-data/main-stars'
+import { MAIN_STARS, getAllMainStars } from '@core/stars-data/main-stars'
 import { ALL_BOOKS, searchClassics } from '../../../ziwei-doushu/classics'
+import type { Book, SearchHit } from '../../../ziwei-doushu/classics'
 import { TIANJI_MODULES, TIANJI_QUOTES } from '../../../ziwei-doushu/nihai'
+import type { NiModule } from '../../../ziwei-doushu/nihai'
 
 const tabs = [
   { k: 'star', n: '星曜' },
@@ -114,16 +116,16 @@ const selStar = ref('')
 const curStar = computed(() => stars.find(s => s.id === selStar.value) ? MAIN_STARS[selStar.value] : null)
 
 // === 经典古籍 ===
-const books = ref(ALL_BOOKS as any[])
+const books = ref<Book[]>(ALL_BOOKS)
 const expanded = ref<Record<string, boolean>>({})
 const kw = ref('')
-const searchHits = ref<any[]>([])
+const searchHits = ref<SearchHit[]>([])
 function toggleBook(slug: string) { expanded.value[slug] = !expanded.value[slug] }
 function doSearch() {
   searchHits.value = searchClassics(kw.value, 30)
 }
 
 // === 倪海厦 ===
-const nihaiZiwei = computed(() => TIANJI_MODULES.find((m: any) => m.slug === 'ziwei') || TIANJI_MODULES[0])
+const nihaiZiwei = computed<NiModule>(() => TIANJI_MODULES.find((m: any) => m.slug === 'ziwei') || TIANJI_MODULES[0])
 const nihaiQuotes = computed(() => (TIANJI_QUOTES || []).slice(0, 12))
 </script>

@@ -2,8 +2,8 @@
  * 命盘导出工具
  */
 
-import type { ChartResult } from '../../../core/types'
-import { STAR_NAMES } from '../../../core/stars-data/star-names'
+import type { ChartResult } from '@core/types'
+import { STAR_NAMES } from '@core/stars-data/star-names'
 
 /** 导出盘面数据为JSON */
 export function exportChartJson(chart: ChartResult): string {

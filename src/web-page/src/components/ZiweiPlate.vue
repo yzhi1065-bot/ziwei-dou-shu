@@ -5,13 +5,14 @@
       <!-- 顶层SVG：跨宫飞线 -->
       <svg class="zw-svg" :width="size" :height="size" v-if="showFly">
         <defs>
-          <marker v-for="t in ['禄','权','科','忌']" :key="t" :id="'ah-'+t" markerWidth="7" markerHeight="6" refX="7" refY="3" orient="auto">
+          <!-- marker ID加uid前缀，避免多实例冲突 -->
+          <marker v-for="t in ['禄','权','科','忌']" :key="t" :id="uid+'-ah-'+t" markerWidth="7" markerHeight="6" refX="7" refY="3" orient="auto">
             <path d="M0,0 L7,3 L0,6Z" :fill="saColor[t]" />
           </marker>
         </defs>
         <path v-for="(l,i) in svgFlyPaths" :key="i" :d="l.d" fill="none"
           :stroke="l.color" :stroke-width="l.w" :stroke-dasharray="l.dash" :opacity="l.op"
-          :marker-end="'url(#ah-'+l.type+')'" />
+          :marker-end="'url(#'+uid+'-ah-'+l.type+')'" />
       </svg>
 
       <div v-for="c in cells" :key="c.k" class="zw-c" :class="{ 'zw-m':c.m, 'zw-s':c.s, 'zw-cc':c.c }"
@@ -79,6 +80,10 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+
+// 实例唯一ID（SVG marker避免多实例冲突）
+let uidCounter = 0
+const uid = `zw${++uidCounter}${Math.random().toString(36).slice(2, 7)}`
 const props = defineProps<{
   palaces:any[]; size?:number; fp?:any; solarDate?:string; timeRange?:string
   ep?:string; mm?:string; sm?:string; gender?:string
