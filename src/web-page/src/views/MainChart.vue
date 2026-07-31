@@ -12,7 +12,9 @@
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
       <div class="lg:col-span-3">
         <ZiweiPlate :palaces="chart.palaces" :size="600" :fp="fp" :solarDate="chart.solarDate" :timeRange="chart.timeRange"
-          :ep="chart.elementPhase" :mm="chart.mingMaster" :sm="chart.shenMaster" :gender="chart.gender" @sel="selIdx=$event" />
+          :ep="chart.elementPhase" :mm="chart.mingMaster" :sm="chart.shenMaster" :gender="chart.gender" @sel="selIdx=$event"
+          :selfArrows="chart.selfArrows" :flyLines="chart.flyLines"
+          :showSelf="store.arrowSettings.showSelf" :showFly="store.arrowSettings.showFly" />
       </div>
       <div class="lg:col-span-2 space-y-2 text-xs">
         <!-- 时间流切换 -->
@@ -25,6 +27,11 @@
             <option v-for="m in 12" :key="m" :value="m">{{ m }}月</option>
           </select>
           <input v-model.number="fd" class="w-10 text-center border rounded" placeholder="日" />
+          <span class="text-gray-300 mx-1">|</span>
+          <button @click="store.arrowSettings.showSelf=!store.arrowSettings.showSelf" class="px-1 text-xs rounded"
+            :class="store.arrowSettings.showSelf?'bg-green-100 text-green-700':'bg-gray-100 text-gray-400'">自化</button>
+          <button @click="store.arrowSettings.showFly=!store.arrowSettings.showFly" class="px-1 text-xs rounded"
+            :class="store.arrowSettings.showFly?'bg-purple-100 text-purple-700':'bg-gray-100 text-gray-400'">飞星</button>
         </div>
 
         <!-- 宫位详情 -->
