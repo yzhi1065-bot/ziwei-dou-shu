@@ -13,7 +13,12 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
       <div class="lg:col-span-3">
-        <ZiweiPlate :palaces="chart.palaces" :size="plateSize" :fp="fp" :solarDate="chart.solarDate" :timeRange="chart.timeRange"
+        <!-- 盘面模式切换 -->
+        <div class="flex gap-1 mb-2">
+          <button @click="plateMode='square'" class="px-2 py-0.5 text-xs rounded" :class="plateMode==='square' ? 'bg-zheshi text-white' : 'bg-mibai text-gray-600'">方盘</button>
+          <button @click="plateMode='circle'" class="px-2 py-0.5 text-xs rounded" :class="plateMode==='circle' ? 'bg-zheshi text-white' : 'bg-mibai text-gray-600'">圆盘</button>
+        </div>
+        <ZiweiPlate v-if="plateMode==='square'" :palaces="chart.palaces" :size="plateSize" :fp="fp" :solarDate="chart.solarDate" :timeRange="chart.timeRange"
           :ep="chart.elementPhase" :mm="chart.mingMaster" :sm="chart.shenMaster" :gender="chart.gender" @sel="selIdx=$event"
           :selfArrows="chart.selfArrows" :decadeSelfArrows="chart.decadeSelfArrows" :yearlySelfArrows="chart.yearlySelfArrows"
           :flyLines="chart.flyLines" :decadeFly="chart.decadeFly" :yearlyFly="chart.yearlyFly"
@@ -21,6 +26,7 @@
           :showSelfDecade="store.arrowSettings.showSelfDecade" :showSelfYearly="store.arrowSettings.showSelfYearly"
           :showDecade="isFeixing && store.arrowSettings.showDecade" :showYearly="isFeixing && store.arrowSettings.showYearly"
           :mode="store.arrowSettings.mode" :density="store.arrowSettings.density" />
+        <ZiweiCircle v-else :palaces="chart.palaces" :size="plateSize" :ep="chart.elementPhase" :mm="chart.mingMaster" :sm="chart.shenMaster" :gender="chart.gender" />
 
         <!-- 命格局 -->
         <div class="scroll-panel rounded-lg p-3 mt-3" v-if="chart.patterns && chart.patterns.length">
@@ -137,8 +143,10 @@
 import { ref, computed, watch } from 'vue'
 import { useChartStore } from '../stores/chart'
 import ZiweiPlate from '../components/ZiweiPlate.vue'
+import ZiweiCircle from '../components/ZiweiCircle.vue'
 
 const store = useChartStore()
+const plateMode = ref('square')
 // 直接读Pinia store（路由切换不丢数据）
 const chart = computed(() => store.chartResult)
 // 飞星派才显示飞线+自化箭头
