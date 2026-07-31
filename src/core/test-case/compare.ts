@@ -63,14 +63,26 @@ export const TEST_SAMPLES: TestSample[] = [
     birth: { year: 2000, month: 1, day: 1, hour: 0, minute: 0 },
     gender: '男',
     school: 'sanhe',
-    expected: {}
+    expected: {
+      yearPillar: '己卯',
+      elementPhase: '水二局',
+      mingPalace: 1,        // 子
+      mingMaster: '贪狼',
+      shenMaster: '天同',
+    }
   },
   {
     name: '2000年儿童节午时（女）',
     birth: { year: 2000, month: 6, day: 1, hour: 12, minute: 0 },
     gender: '女',
     school: 'sanhe',
-    expected: {}
+    expected: {
+      yearPillar: '庚辰',
+      elementPhase: '土五局',
+      mingPalace: 12,       // 亥
+      mingMaster: '巨门',
+      shenMaster: '文昌',
+    }
   },
   {
     name: '戊申年十月廿三辰时（男）',
@@ -95,21 +107,39 @@ export const TEST_SAMPLES: TestSample[] = [
     birth: { year: 2001, month: 6, day: 25, hour: 4, minute: 0 },
     gender: '男',
     school: 'sanhe',
-    expected: {}
+    expected: {
+      yearPillar: '辛巳',
+      elementPhase: '水二局',
+      mingPalace: 5,        // 辰
+      mingMaster: '廉贞',
+      shenMaster: '天机',
+    }
   },
   {
     name: '流派测试-飞星派（女）',
     birth: { year: 1995, month: 3, day: 15, hour: 14, minute: 30 },
     gender: '女',
     school: 'feixing',
-    expected: {}
+    expected: {
+      yearPillar: '乙亥',
+      elementPhase: '水二局',
+      mingPalace: 9,        // 申
+      mingMaster: '廉贞',
+      shenMaster: '天机',
+    }
   },
   {
     name: '倪海厦派测试（男）',
     birth: { year: 1988, month: 5, day: 20, hour: 10, minute: 0 },
     gender: '男',
     school: 'nishi',
-    expected: {}
+    expected: {
+      yearPillar: '戊辰',
+      elementPhase: '金四局',
+      mingPalace: 1,        // 子
+      mingMaster: '贪狼',
+      shenMaster: '文昌',
+    }
   },
 ]
 

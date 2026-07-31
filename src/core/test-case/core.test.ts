@@ -49,7 +49,7 @@ describe('历法换算核心', () => {
   it('公历转农历 - 1990年8月30日', () => {
     const result = solarToLunar(1990, 8, 30)
     expect(result.month).toBe(7)
-    expect(result.day).toBe(9)
+    expect(result.day).toBe(11) // iztro/lunar-javascript 标准值
   })
 
   it('公历闰年判断', () => {
