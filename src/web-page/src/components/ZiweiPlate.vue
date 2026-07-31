@@ -30,17 +30,17 @@
           <div v-if="c.s" class="zt">身</div>
           <!-- 自化小箭头（四角，中层）：本命实心/大限空心/流年发光 -->
           <template v-if="showSelf">
-            <div v-for="sa in c.selfs" :key="'m'+sa.t" class="sa" :class="['sa-'+sa.t, sa.d==='in' ? 'sa-in' : 'sa-out']"
-              :style="{ background: saColor[sa.t], border: '0.5px solid rgba(0,0,0,0.15)' }">
-              <span class="sa-label" v-if="mode==='letter'">{{ LETTER[sa.t] }}</span>
+            <div v-for="sa in c.selfs" :key="'m'+sa.type" class="sa" :class="['sa-'+sa.type, sa.direction==='in' ? 'sa-in' : 'sa-out']"
+              :style="{ background: saColor[sa.type], border: '0.5px solid rgba(0,0,0,0.15)' }">
+              <span class="sa-label" v-if="mode==='letter'">{{ LETTER[sa.type] }}</span>
             </div>
-            <div v-for="sa in c.selfsDec" :key="'d'+sa.t" class="sa sa-hollow" :class="['sa-'+sa.t, sa.d==='in' ? 'sa-in' : 'sa-out']"
-              :style="{ borderColor: saColor[sa.t] }">
-              <span class="sa-label" v-if="mode==='letter'">{{ LETTER[sa.t] }}</span>
+            <div v-for="sa in c.selfsDec" :key="'d'+sa.type" class="sa sa-hollow" :class="['sa-'+sa.type, sa.direction==='in' ? 'sa-in' : 'sa-out']"
+              :style="{ borderColor: saColor[sa.type] }">
+              <span class="sa-label" v-if="mode==='letter'">{{ LETTER[sa.type] }}</span>
             </div>
-            <div v-for="sa in c.selfsYr" :key="'y'+sa.t" class="sa sa-glow" :class="['sa-'+sa.t, sa.d==='in' ? 'sa-in' : 'sa-out']"
-              :style="{ background: saColor[sa.t] }">
-              <span class="sa-label" v-if="mode==='letter'">{{ LETTER[sa.t] }}</span>
+            <div v-for="sa in c.selfsYr" :key="'y'+sa.type" class="sa sa-glow" :class="['sa-'+sa.type, sa.direction==='in' ? 'sa-in' : 'sa-out']"
+              :style="{ background: saColor[sa.type] }">
+              <span class="sa-label" v-if="mode==='letter'">{{ LETTER[sa.type] }}</span>
             </div>
           </template>
           <!-- 宫头 -->
