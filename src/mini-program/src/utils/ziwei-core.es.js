@@ -1,15 +1,15 @@
-const S = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"], b = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
-function se(n) {
-  return b.indexOf(n) + 1;
+const w = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"], x = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
+function me(n) {
+  return x.indexOf(n) + 1;
 }
 function de(n) {
-  return b[((n - 1) % 12 + 12) % 12];
-}
-function me(n) {
-  return S[(n % 10 + 10) % 10];
+  return x[((n - 1) % 12 + 12) % 12];
 }
 function ge(n) {
-  return S.indexOf(n);
+  return w[(n % 10 + 10) % 10];
+}
+function he(n) {
+  return w.indexOf(n);
 }
 const tn = [
   "命宫",
@@ -226,7 +226,7 @@ const tn = [
   53584,
   62034
 ], jn = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31], B = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"], z = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
-let k = null;
+let C = null;
 function O(n) {
   const t = n - 1901;
   if (t < 0 || t >= K.length)
@@ -242,26 +242,26 @@ function L(n, t) {
 function v(n) {
   return n & 65536 ? 30 : 29;
 }
-function he(n, t, e) {
+function fe(n, t, e) {
   const a = O(n);
   return e ? A(a) === t ? v(a) : 0 : L(a, t) ? 30 : 29;
 }
-function kn(n) {
+function Cn(n) {
   const t = O(n);
   let e = 0;
   for (let i = 1; i <= 12; i++)
     e += L(t, i) ? 30 : 29;
   return A(t) > 0 && (e += v(t)), e;
 }
-function C(n) {
-  if (!k) {
-    k = /* @__PURE__ */ new Map();
+function k(n) {
+  if (!C) {
+    C = /* @__PURE__ */ new Map();
     let t = 49;
-    k.set(1901, t);
+    C.set(1901, t);
     for (let e = 1902; e <= 2101; e++)
-      t += kn(e - 1), k.set(e, t);
+      t += Cn(e - 1), C.set(e, t);
   }
-  return k.get(n) ?? 49;
+  return C.get(n) ?? 49;
 }
 function Z(n) {
   return n % 4 === 0 && n % 100 !== 0 || n % 400 === 0;
@@ -277,7 +277,7 @@ function an(n, t, e) {
     a += en(n, i);
   return a + e - 1;
 }
-function rn(n) {
+function on(n) {
   let t = 1901;
   for (; ; ) {
     const e = Z(t) ? 366 : 365;
@@ -292,50 +292,50 @@ function rn(n) {
   }
   return { year: t, month: 12, day: 31 };
 }
-function un(n, t, e) {
+function rn(n, t, e) {
   const a = an(n, t, e);
   let i = 1901 + Math.floor((a - 49) / 355);
-  for (i < 1901 && (i = 1901), i > 2100 && (i = 2100); C(i) > a && i > 1901; )
+  for (i < 1901 && (i = 1901), i > 2100 && (i = 2100); k(i) > a && i > 1901; )
     i--;
-  for (; i < 2100 && C(i + 1) <= a; )
+  for (; i < 2100 && k(i + 1) <= a; )
     i++;
-  const r = C(i);
-  let u = a - r;
-  const l = O(i), o = A(l);
-  for (let s = 1; s <= 12; s++) {
-    const m = L(l, s) ? 30 : 29;
-    if (u < m)
-      return { year: i, month: s, day: u + 1, isLeap: !1 };
-    if (u -= m, o === s) {
-      const c = v(l);
-      if (u < c)
-        return { year: i, month: s, day: u + 1, isLeap: !0 };
-      u -= c;
+  const o = k(i);
+  let r = a - o;
+  const c = O(i), u = A(c);
+  for (let l = 1; l <= 12; l++) {
+    const d = L(c, l) ? 30 : 29;
+    if (r < d)
+      return { year: i, month: l, day: r + 1, isLeap: !1 };
+    if (r -= d, u === l) {
+      const s = v(c);
+      if (r < s)
+        return { year: i, month: l, day: r + 1, isLeap: !0 };
+      r -= s;
     }
   }
-  return { year: i + 1, month: 1, day: u + 1, isLeap: !1 };
+  return { year: i + 1, month: 1, day: r + 1, isLeap: !1 };
 }
-function on(n, t, e, a) {
-  const i = C(n), r = O(n), u = A(r);
-  let l = 0;
-  for (let o = 1; o < t; o++)
-    l += L(r, o) ? 30 : 29, u === o && (l += v(r));
+function un(n, t, e, a) {
+  const i = k(n), o = O(n), r = A(o);
+  let c = 0;
+  for (let u = 1; u < t; u++)
+    c += L(o, u) ? 30 : 29, r === u && (c += v(o));
   if (a) {
-    if (u !== t)
+    if (r !== t)
       throw new Error(`农历${n}年${t}月无闰月`);
-    l += L(r, t) ? 30 : 29;
+    c += L(o, t) ? 30 : 29;
   }
-  return l += e - 1, rn(i + l);
-}
-function fe(n) {
-  const t = C(n);
-  return rn(t);
+  return c += e - 1, on(i + c);
 }
 function ye(n) {
+  const t = k(n);
+  return on(t);
+}
+function pe(n) {
   const t = O(n);
   return A(t);
 }
-function Cn(n) {
+function kn(n) {
   const t = ((n - 4) % 10 + 10) % 10, e = ((n - 4) % 12 + 12) % 12;
   return { stem: B[t], branch: z[e] };
 }
@@ -361,13 +361,13 @@ function An(n, t) {
   };
 }
 function qn(n, t, e, a, i = !1) {
-  let r = n, u = t, l = e;
+  let o = n, r = t, c = e;
   if (i) {
-    const h = on(n, t, e, !1);
-    r = h.year, u = h.month, l = h.day;
+    const h = un(n, t, e, !1);
+    o = h.year, r = h.month, c = h.day;
   }
-  const o = Cn(r), s = un(r, u, l), m = B.indexOf(o.stem), c = Ln(m, s.month), g = On(r, u, l), p = B.indexOf(g.stem), f = An(p, a);
-  return { yearPillar: o, monthPillar: c, dayPillar: g, hourPillar: f };
+  const u = kn(o), l = rn(o, r, c), d = B.indexOf(u.stem), s = Ln(d, l.month), g = On(o, r, c), p = B.indexOf(g.stem), f = An(p, a);
+  return { yearPillar: u, monthPillar: s, dayPillar: g, hourPillar: f };
 }
 const Pn = [
   { name: "小寒", nameEn: "Minor Cold", longitude: 285, lunarMonth: 12, isSection: !1 },
@@ -395,7 +395,7 @@ const Pn = [
   { name: "大雪", nameEn: "Major Snow", longitude: 255, lunarMonth: 11, isSection: !0 },
   { name: "冬至", nameEn: "Winter Solstice", longitude: 270, lunarMonth: 11, isSection: !1 }
 ];
-function pe() {
+function we() {
   return Pn.map((n) => n.name);
 }
 function zn(n, t) {
@@ -451,8 +451,8 @@ function zn(n, t) {
     // 冬至
   ];
   let [a, i] = e[t];
-  const r = n - 2e3, u = Math.round(r * 0.0104);
-  for (i -= u; i < 1; )
+  const o = n - 2e3, r = Math.round(o * 0.0104);
+  for (i -= r; i < 1; )
     a--, i += D(n, a);
   for (; i > D(n, a); )
     i -= D(n, a), a++;
@@ -473,14 +473,14 @@ function vn(n, t, e) {
 function Se(n, t, e) {
   const a = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 0];
   let i = 0;
-  for (let r = 1; r <= 12; r++) {
-    const u = a[r - 1];
-    if (u === 0) {
-      R(n, t, e, u) || (i = 12);
+  for (let o = 1; o <= 12; o++) {
+    const r = a[o - 1];
+    if (r === 0) {
+      R(n, t, e, r) || (i = 12);
       continue;
     }
-    if (!R(n, t, e, u))
-      i = r;
+    if (!R(n, t, e, r))
+      i = o;
     else
       break;
   }
@@ -529,53 +529,53 @@ function Ee(n) {
     (t) => t.city === n || t.city.includes(n) || n.includes(t.city)
   );
 }
-const ln = 120;
-function Yn(n, t, e) {
-  const i = (ln - e) * 4;
-  let r = n * 60 + t - i;
-  const u = Math.floor(r / 60), l = Math.round(r % 60);
+const cn = 120;
+function _n(n, t, e) {
+  const i = (cn - e) * 4;
+  let o = n * 60 + t - i;
+  const r = Math.floor(o / 60), c = Math.round(o % 60);
   return {
-    hour: (u % 24 + 24) % 24,
-    minute: (l % 60 + 60) % 60
+    hour: (r % 24 + 24) % 24,
+    minute: (c % 60 + 60) % 60
   };
 }
-function _n(n) {
+function Yn(n) {
   const t = 360 * (n - 81) / 365 * Math.PI / 180;
   return 9.87 * Math.sin(2 * t) - 7.53 * Math.cos(t) - 1.5 * Math.sin(t);
 }
 function Fn(n, t, e) {
   const a = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
   let i = 0;
-  for (let r = 0; r < t - 1; r++)
-    i += a[r];
+  for (let o = 0; o < t - 1; o++)
+    i += a[o];
   return i += e, t > 2 && (n % 4 === 0 && n % 100 !== 0 || n % 400 === 0) && (i += 1), i;
 }
-function Nn(n, t, e, a, i, r) {
-  const u = Yn(a, i, r), l = Fn(n, t, e), o = _n(l);
-  let s = u.hour * 60 + u.minute + o;
-  const m = (Math.floor(s / 60) % 24 + 24) % 24, c = (Math.round(s % 60) + 60) % 60, g = Math.floor((m + 1) % 24 / 2), f = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"][g], h = ln - r, $ = h !== 0 ? `北京时间→地方平太阳时修正${Math.abs(h * 4).toFixed(1)}分钟（${h > 0 ? "晚" : "早"}），均时差修正${o > 0 ? "+" : ""}${o.toFixed(1)}分钟` : `已在北京时区，仅做均时差修正${o > 0 ? "+" : ""}${o.toFixed(1)}分钟`;
+function Nn(n, t, e, a, i, o) {
+  const r = _n(a, i, o), c = Fn(n, t, e), u = Yn(c);
+  let l = r.hour * 60 + r.minute + u;
+  const d = (Math.floor(l / 60) % 24 + 24) % 24, s = (Math.round(l % 60) + 60) % 60, g = Math.floor((d + 1) % 24 / 2), f = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"][g], h = cn - o, $ = h !== 0 ? `北京时间→地方平太阳时修正${Math.abs(h * 4).toFixed(1)}分钟（${h > 0 ? "晚" : "早"}），均时差修正${u > 0 ? "+" : ""}${u.toFixed(1)}分钟` : `已在北京时区，仅做均时差修正${u > 0 ? "+" : ""}${u.toFixed(1)}分钟`;
   return {
     originalHour: a,
     originalMinute: i,
-    localMeanHour: u.hour,
-    localMeanMinute: u.minute,
-    trueSolarHour: m,
-    trueSolarMinute: c,
+    localMeanHour: r.hour,
+    localMeanMinute: r.minute,
+    trueSolarHour: d,
+    trueSolarMinute: s,
     timeBranchIndex: g,
     timeBranchName: f,
     note: $
   };
 }
-function Dn(n, t, e, a, i, r) {
-  return r !== void 0 && r !== 120 ? Nn(n, t, e, a, i, r).timeBranchIndex : Math.floor((a + 1) % 24 / 2);
+function Dn(n, t, e, a, i, o) {
+  return o !== void 0 && o !== 120 ? Nn(n, t, e, a, i, o).timeBranchIndex : Math.floor((a + 1) % 24 / 2);
 }
 function Rn(n, t, e = !1) {
-  let u = (2 + (n - 1)) % 12 + 1 - t;
-  return u <= 0 && (u += 12), u;
+  let r = (2 + (n - 1)) % 12 + 1 - t;
+  return r <= 0 && (r += 12), r;
 }
 function Gn(n, t) {
-  let r = (2 + (n - 1)) % 12 + 1 + t;
-  return r > 12 && (r -= 12), r;
+  let o = (2 + (n - 1)) % 12 + 1 + t;
+  return o > 12 && (o -= 12), o;
 }
 function Zn(n) {
   const t = [];
@@ -586,74 +586,50 @@ function Zn(n) {
   return t;
 }
 function W(n, t) {
-  const e = [2, 4, 6, 8, 0], a = Math.floor(n % 10 / 2), i = e[a], r = ((t - 3) % 12 + 12) % 12, u = ((i + r) % 10 + 10) % 10;
-  return S[u];
+  const e = [2, 4, 6, 8, 0], a = Math.floor(n % 10 / 2), i = e[a], o = ((t - 3) % 12 + 12) % 12, r = ((i + o) % 10 + 10) % 10;
+  return w[r];
 }
 function Wn(n) {
   return {
     1: "贪狼",
-    // 子
     2: "巨门",
-    // 丑
     3: "禄存",
-    // 寅
-    4: "文昌",
-    // 卯
+    4: "文曲",
     5: "廉贞",
-    // 辰
     6: "武曲",
-    // 巳
     7: "破军",
-    // 午
     8: "武曲",
-    // 未
     9: "廉贞",
-    // 申
-    10: "文昌",
-    // 酉
+    10: "文曲",
     11: "禄存",
-    // 戌
     12: "巨门"
-    // 亥
   }[n] || "";
 }
 function $n(n) {
   return {
     1: "火星",
-    // 子
     2: "天相",
-    // 丑
     3: "天梁",
-    // 寅
     4: "天同",
-    // 卯
     5: "文昌",
-    // 辰
     6: "天机",
-    // 巳
-    7: "铃星",
-    // 午
+    7: "火星",
     8: "天相",
-    // 未
     9: "天梁",
-    // 申
     10: "天同",
-    // 酉
     11: "文昌",
-    // 戌
     12: "天机"
-    // 亥
   }[n] || "";
 }
 function Xn(n, t, e) {
-  return Zn(n).map((i, r) => {
-    const u = W(e, i), l = b[i - 1];
+  return Zn(n).map((i, o) => {
+    const r = W(e, i), c = x[i - 1];
     return {
-      name: tn[r],
-      stem: u,
-      branch: l,
+      name: tn[o],
+      stem: r,
+      branch: c,
       branchIndex: i,
-      isMing: r === 0,
+      isMing: o === 0,
       isShen: i === t,
       mainStars: [],
       minorStars: [],
@@ -681,8 +657,8 @@ function Jn() {
   for (let e = 0; e < 5; e++) {
     const a = n[e];
     let i = t;
-    for (let r = 1; r <= 30; r++)
-      G[e][r - 1] = i, r % a === 0 && (i++, i > 12 && (i = 1));
+    for (let o = 1; o <= 30; o++)
+      G[e][o - 1] = i, o % a === 0 && (i++, i > 12 && (i = 1));
   }
 }
 Jn();
@@ -700,26 +676,26 @@ function Kn(n, t) {
 function Vn(n) {
   return ((8 - n) % 12 % 12 + 12) % 12 || 12;
 }
-function cn(n, t) {
+function sn(n, t) {
   const e = Kn(n, t), a = Vn(e), i = {};
-  for (let r = 0; r < V.length; r++) {
-    const u = V[r];
-    if (!u) continue;
-    const l = Qn[r];
-    let o = e + l;
-    o > 12 && (o -= 12), i[u] = o;
+  for (let o = 0; o < V.length; o++) {
+    const r = V[o];
+    if (!r) continue;
+    const c = Qn[o];
+    let u = e + c;
+    u > 12 && (u -= 12), i[r] = u;
   }
-  for (let r = 0; r < nn.length; r++) {
-    const u = nn[r];
-    if (!u) continue;
-    const l = Un[r];
-    let o = a - l;
-    o < 1 && (o += 12), i[u] = o;
+  for (let o = 0; o < nn.length; o++) {
+    const r = nn[o];
+    if (!r) continue;
+    const c = Un[o];
+    let u = a - c;
+    u < 1 && (u += 12), i[r] = u;
   }
   return { ziweiBranch: e, tianfuBranch: a, starMap: i };
 }
-function we(n, t) {
-  return cn(n, t).starMap;
+function xe(n, t) {
+  return sn(n, t).starMap;
 }
 const nt = {
   // 甲子乙丑组 → 金4
@@ -844,41 +820,40 @@ function be(n) {
 function it(n) {
   return (4 + n - 1) % 12 + 1;
 }
-function rt(n) {
+function ot(n) {
   return ((10 - (n - 1)) % 12 + 12) % 12 + 1;
 }
-function ut(n) {
+function rt(n) {
   return ((10 - n) % 12 + 12) % 12 + 1;
 }
-function ot(n) {
+function ut(n) {
   return (4 + n) % 12 + 1;
 }
-function lt(n) {
+function ct(n) {
   return {
-    // 年干 → [天魁, 天钺]
     0: [2, 8],
     // 甲 → 丑(2), 未(8)
-    1: [1, 7],
-    // 乙 → 子(1), 申(9) → 子,申
+    1: [1, 9],
+    // 乙 → 子(1), 申(9)
     2: [12, 10],
     // 丙 → 亥(12), 酉(10)
-    3: [6, 4],
-    // 丁 → 巳(6), 卯(4)
+    3: [12, 10],
+    // 丁 → 亥(12), 酉(10)
     4: [2, 8],
     // 戊 → 丑(2), 未(8)
-    5: [1, 7],
+    5: [1, 9],
     // 己 → 子(1), 申(9)
-    6: [3, 5],
-    // 庚 → 寅(3), 午(7), 甲戊庚牛羊 → 丑未
-    7: [3, 5],
-    // 辛 → 寅(3), 午(7)
-    8: [6, 4],
-    // 壬 → 巳(6), 卯(4)
-    9: [6, 4]
-    // 癸 → 巳(6), 卯(4)
+    6: [2, 8],
+    // 庚 → 丑(2), 未(8)
+    7: [7, 3],
+    // 辛 → 午(7), 寅(3)
+    8: [4, 6],
+    // 壬 → 卯(4), 巳(6)
+    9: [4, 6]
+    // 癸 → 卯(4), 巳(6)
   }[n] || [2, 8];
 }
-function ct(n) {
+function st(n) {
   return {
     0: 3,
     // 甲 → 寅
@@ -902,13 +877,13 @@ function ct(n) {
     // 癸 → 子
   }[n] || 3;
 }
-function st(n) {
+function lt(n) {
   return n % 12 + 1;
 }
-function dt(n) {
+function mt(n) {
   return ((n - 2) % 12 + 12) % 12 + 1;
 }
-function mt(n, t) {
+function dt(n, t) {
   const a = {
     3: { start: 2, forward: !0 },
     // 寅
@@ -1000,13 +975,13 @@ function yt(n) {
     // 酉 → 巳
   }[n] || 3;
 }
-function sn(n) {
+function ln(n) {
   return (3 + n - 1) % 12 + 1;
 }
 function pt(n) {
-  return (sn(n) - 1 + 6) % 12 + 1;
+  return (ln(n) - 1 + 6) % 12 + 1;
 }
-function dn(n) {
+function mn(n) {
   return {
     1: 7,
     2: 8,
@@ -1022,22 +997,22 @@ function dn(n) {
     12: 6
   }[n] || 7;
 }
-function St(n) {
-  return (dn(n) - 1 + 6) % 12 + 1;
+function wt(n) {
+  return (mn(n) - 1 + 6) % 12 + 1;
 }
-function Et(n) {
+function St(n) {
   return (3 + n) % 12 + 1;
 }
-function wt(n) {
+function Et(n) {
   return ((3 - n) % 12 + 12) % 12 + 1;
 }
-function bt(n) {
+function xt(n) {
   return (4 + n - 1) % 12 + 1;
 }
-function Tt(n) {
+function bt(n) {
   return (10 + n - 1) % 12 + 1;
 }
-function mn(n) {
+function dn(n) {
   return {
     3: 6,
     4: 6,
@@ -1057,13 +1032,13 @@ function mn(n) {
     // 亥子丑 → 寅
   }[n] || 6;
 }
-function Mt(n) {
-  return (mn(n) - 1 + 6) % 12 + 1;
+function Tt(n) {
+  return (dn(n) - 1 + 6) % 12 + 1;
 }
-function It(n) {
+function Mt(n) {
   return (2 + n - 1) % 12 + 1;
 }
-function xt(n) {
+function It(n) {
   return (2 + n - 1) % 12 + 1;
 }
 function Bt(n) {
@@ -1072,17 +1047,17 @@ function Bt(n) {
 function jt(n) {
   return (8 + n) % 12 + 1;
 }
-function kt(n, t, e, a, i = !0, r = !0) {
-  const u = {}, l = {}, o = {};
-  u.zuobi = it(n), u.youbi = rt(n), u.wenchang = ut(t), u.wenqu = ot(t);
-  const [s, m] = lt(e);
-  if (u.tiankui = s, u.tianyue = m, u.lucun = ct(e), u.tianma = yt(a), i) {
-    const c = u.lucun;
-    l.qingyang = st(c), l.tuoluo = dt(c), l.huoxing = mt(a, t), l.lingxing = gt(a, t), l.dikong = ht(t), l.dijie = ft(t);
+function Ct(n, t, e, a, i = !0, o = !0) {
+  const r = {}, c = {}, u = {};
+  r.zuobi = it(n), r.youbi = ot(n), r.wenchang = rt(t), r.wenqu = ut(t);
+  const [l, d] = ct(e);
+  if (r.tiankui = l, r.tianyue = d, r.lucun = st(e), r.tianma = yt(a), i) {
+    const s = r.lucun;
+    c.qingyang = lt(s), c.tuoluo = mt(s), c.huoxing = dt(a, t), c.lingxing = gt(a, t), c.dikong = ht(t), c.dijie = ft(t);
   }
-  return r && (o.hongluan = sn(a), o.tianxi = pt(a), o.tianku = dn(a), o.tianxu = St(a), o.longchi = bt(a), o.fengge = Tt(a), o.guchen = mn(a), o.gusu = Mt(a), o.santai = Et(t), o.bazuo = wt(t), o.tianguan = It(n), o.tianfu2 = xt(n), o.taifu = Bt(t), o.fenghao = jt(t)), { lucky: u, sha: l, misc: o };
+  return o && (u.hongluan = ln(a), u.tianxi = pt(a), u.tianku = mn(a), u.tianxu = wt(a), u.longchi = xt(a), u.fengge = bt(a), u.guchen = dn(a), u.gusu = Tt(a), u.santai = St(t), u.bazuo = Et(t), u.tianguan = Mt(n), u.tianfu2 = It(n), u.taifu = Bt(t), u.fenghao = jt(t)), { lucky: r, sha: c, misc: u };
 }
-const Ct = {
+const kt = {
   甲: ["lianzhen", "pojun", "wuqu", "taiyang"],
   乙: ["tianji", "tianliang", "ziwei", "taiyin"],
   丙: ["tiantong", "tianji", "wenchang", "lianzhen"],
@@ -1136,31 +1111,31 @@ function hn(n = "sanhe") {
     case "nishi":
       return At;
     default:
-      return Ct;
+      return kt;
   }
 }
-function T(n, t = "sanhe") {
+function b(n, t = "sanhe") {
   const a = hn(t)[n];
-  return a ? a.map((i, r) => ({
+  return a ? a.map((i, o) => ({
     starId: i,
-    type: gn[r]
+    type: gn[o]
   })) : [];
 }
 function Te(n, t, e = "sanhe") {
   const i = hn(e)[n];
   if (!i) return null;
-  const r = i.indexOf(t);
-  return r === -1 ? null : gn[r];
+  const o = i.indexOf(t);
+  return o === -1 ? null : gn[o];
 }
 function Me(n, t = "sanhe") {
-  return T(n, t);
+  return b(n, t);
 }
 function Ie(n, t = "sanhe") {
-  const e = (n - 4) % 10, a = S[(e % 10 + 10) % 10];
-  return T(a, t);
+  const e = (n - 4) % 10, a = w[(e % 10 + 10) % 10];
+  return b(a, t);
 }
-function xe(n, t, e = "sanhe") {
-  const r = (({
+function Be(n, t, e = "sanhe") {
+  const o = (({
     甲: 2,
     乙: 4,
     丙: 6,
@@ -1171,15 +1146,15 @@ function xe(n, t, e = "sanhe") {
     辛: 6,
     壬: 8,
     癸: 0
-  }[n] ?? 2) + t - 1) % 10, u = S[r];
-  return T(u, e);
+  }[n] ?? 2) + t - 1) % 10, r = w[o];
+  return b(r, e);
 }
-function Be(n, t, e, a, i = "sanhe") {
-  const r = S.indexOf(n), u = (e * 30 + a) % 10, l = (r + u) % 10, o = S[l];
-  return T(o, i);
+function je(n, t, e, a, i = "sanhe") {
+  const o = w.indexOf(n), r = (e * 30 + a) % 10, c = (o + r) % 10, u = w[c];
+  return b(u, i);
 }
 function qt(n, t = "sanhe") {
-  return T(n, t);
+  return b(n, t);
 }
 function Pt(n) {
   return n % 2 === 0;
@@ -1188,77 +1163,77 @@ function zt(n, t) {
   const e = Pt(n);
   return !!(e && t === "男" || !e && t === "女");
 }
-function vt(n, t, e, a, i, r) {
-  const u = zt(e, i), o = at(r), s = [];
-  for (let m = 0; m < 12; m++) {
-    let c;
-    u ? c = (n + m - 1) % 12 + 1 : c = ((n - 1 - m) % 12 + 12) % 12 + 1;
-    const g = W(e, c), p = b[c - 1], f = o + m * 10, h = f + 9;
-    s.push({
-      palaceIndex: c,
+function vt(n, t, e, a, i, o) {
+  const r = zt(e, i), u = at(o), l = [];
+  for (let d = 0; d < 12; d++) {
+    let s;
+    r ? s = (n + d - 1) % 12 + 1 : s = ((n - 1 - d) % 12 + 12) % 12 + 1;
+    const g = W(e, s), p = x[s - 1], f = u + d * 10, h = f + 9;
+    l.push({
+      palaceIndex: s,
       startAge: f,
       endAge: h,
       stem: g,
       branch: p
     });
   }
-  return s;
+  return l;
 }
 function Ht(n, t) {
   return n.find((e) => t >= e.startAge && t <= e.endAge);
 }
-function je(n, t, e) {
+function Ce(n, t, e) {
   const a = t - n + 1;
   return Ht(e, a);
 }
 function ke(n) {
   const t = (n - 4) % 12;
-  return b[(t % 12 + 12) % 12];
-}
-function Yt(n) {
-  const t = (n - 4) % 10;
-  return S[(t % 10 + 10) % 10];
+  return x[(t % 12 + 12) % 12];
 }
 function _t(n) {
+  const t = (n - 4) % 10;
+  return w[(t % 10 + 10) % 10];
+}
+function Yt(n) {
   return ((n - 4) % 12 + 12) % 12 + 1;
 }
-function Ce(n) {
-  const t = Yt(n);
-  return T(t);
+function Le(n) {
+  const t = _t(n);
+  return b(t);
 }
 function Ft(n, t) {
-  const e = _t(n) - 1, a = (t - 1) % 12;
+  const e = Yt(n) - 1, a = (t - 1) % 12;
   return (e + a) % 12 + 1;
 }
-function Le(n, t, e) {
+function Oe(n, t, e) {
   return (Ft(n, t) - 1 + (e - 1)) % 12 + 1;
 }
 function Nt(n, t) {
-  var o, s, m;
-  const e = (o = Object.entries(t).find(([c]) => c === "qisha")) == null ? void 0 : o[1], a = (s = Object.entries(t).find(([c]) => c === "pojun")) == null ? void 0 : s[1], i = (m = Object.entries(t).find(([c]) => c === "tanlang")) == null ? void 0 : m[1];
+  var u, l, d;
+  const e = (u = Object.entries(t).find(([s]) => s === "qisha")) == null ? void 0 : u[1], a = (l = Object.entries(t).find(([s]) => s === "pojun")) == null ? void 0 : l[1], i = (d = Object.entries(t).find(([s]) => s === "tanlang")) == null ? void 0 : d[1];
   if (!e || !a || !i) return !1;
-  const u = n[0].branchIndex, l = /* @__PURE__ */ new Set([
-    u,
-    (u - 1 + 6) % 12 + 1,
+  const r = n[0].branchIndex, c = /* @__PURE__ */ new Set([
+    r,
+    (r - 1 + 6) % 12 + 1,
     // 对宫
-    (u - 1 + 4) % 12 + 1,
+    (r - 1 + 4) % 12 + 1,
     // 财帛
-    (u - 1 + 10) % 12 + 1
+    (r - 1 + 10) % 12 + 1
     // 官禄
   ]);
-  return l.has(e) && l.has(a) && l.has(i);
+  return c.has(e) && c.has(a) && c.has(i);
 }
 function Dt(n, t) {
-  var o, s, m, c;
-  const e = (o = Object.entries(t).find(([g]) => g === "tianji")) == null ? void 0 : o[1], a = (s = Object.entries(t).find(([g]) => g === "taiyin")) == null ? void 0 : s[1], i = (m = Object.entries(t).find(([g]) => g === "tiantong")) == null ? void 0 : m[1], r = (c = Object.entries(t).find(([g]) => g === "tianliang")) == null ? void 0 : c[1];
-  if (!e || !a || !i || !r) return !1;
-  const u = n[0].branchIndex, l = /* @__PURE__ */ new Set([
-    u,
-    (u - 1 + 6) % 12 + 1,
-    (u - 1 + 4) % 12 + 1,
-    (u - 1 + 10) % 12 + 1
+  var u, l, d, s;
+  const e = (u = Object.entries(t).find(([g]) => g === "tianji")) == null ? void 0 : u[1], a = (l = Object.entries(t).find(([g]) => g === "taiyin")) == null ? void 0 : l[1], i = (d = Object.entries(t).find(([g]) => g === "tiantong")) == null ? void 0 : d[1], o = (s = Object.entries(t).find(([g]) => g === "tianliang")) == null ? void 0 : s[1];
+  if (!e || !a || !i || !o) return !1;
+  const r = n[0].branchIndex, c = /* @__PURE__ */ new Set([
+    r,
+    (r - 1 + 6) % 12 + 1,
+    (r - 1 + 4) % 12 + 1,
+    (r - 1 + 10) % 12 + 1
   ]);
-  return l.has(e) && l.has(a) && l.has(i) && l.has(r);
+  return c.has(e) && c.has(a) && c.has(i) && c.has(o);
 }
 function Rt(n) {
   const t = n.ziwei, e = n.tianfu;
@@ -1279,14 +1254,14 @@ function Zt(n) {
 function Wt(n, t) {
   const e = n.tianfu, a = n.tianxiang;
   if (!e || !a) return !1;
-  const i = t[0].branchIndex, r = /* @__PURE__ */ new Set([
+  const i = t[0].branchIndex, o = /* @__PURE__ */ new Set([
     i,
     (i - 1 + 4) % 12 + 1,
     // 财帛
     (i - 1 + 10) % 12 + 1
     // 官禄
   ]);
-  return r.has(e) && r.has(a);
+  return o.has(e) && o.has(a);
 }
 function $t(n, t) {
   const e = n.tanlang;
@@ -1304,7 +1279,7 @@ function Qt(n, t) {
   const e = n.jumen, a = n.tianji;
   return !e || !a ? !1 : t[0].branchIndex === e && e === a;
 }
-function Oe(n, t) {
+function Ae(n, t) {
   return n.tianxiang, !1;
 }
 const Ut = [
@@ -1334,95 +1309,95 @@ function Vt(n) {
     month: e,
     day: a,
     hour: i,
-    minute: r,
-    gender: u,
-    longitude: l,
-    latitude: o,
-    school: s = "sanhe",
-    isLunar: m = !1
+    minute: o,
+    gender: r,
+    longitude: c,
+    latitude: u,
+    school: l = "sanhe",
+    isLunar: d = !1
   } = n;
-  let c = t, g = e, p = a, f = e, h = a;
-  if (m) {
-    const d = on(t, e, a, !1);
-    c = d.year, g = d.month, p = d.day;
+  let s = t, g = e, p = a, f = e, h = a;
+  if (d) {
+    const m = un(t, e, a, !1);
+    s = m.year, g = m.month, p = m.day;
   } else {
-    const d = un(t, e, a);
-    d.year, f = d.month, h = d.day, d.isLeap;
+    const m = rn(t, e, a);
+    m.year, f = m.month, h = m.day, m.isLeap;
   }
-  const X = vn(c, g, p) ? c : c - 1, j = (X - 4) % 10, q = ((X - 4) % 12 + 12) % 12, J = S[(j % 10 + 10) % 10], En = b[(q % 12 + 12) % 12], M = qn(c, g, p, i, !1), H = Dn(c, g, p, i, r, l), I = Rn(f, H, !1), Y = Gn(f, H), wn = W((j % 10 + 10) % 10, I), bn = b[I - 1], P = et(wn, bn), Tn = Wn(I), Mn = $n(q + 1), _ = cn(P, h).starMap, x = kt(
+  const X = vn(s, g, p) ? s : s - 1, j = (X - 4) % 10, q = ((X - 4) % 12 + 12) % 12, J = w[(j % 10 + 10) % 10], Sn = x[(q % 12 + 12) % 12], T = qn(s, g, p, i, !1), H = Dn(s, g, p, i, o, c), M = Rn(f, H, !1), _ = Gn(f, H), En = W((j % 10 + 10) % 10, M), xn = x[M - 1], P = et(En, xn), bn = Wn(M), Tn = $n(q + 1), Y = sn(P, h).starMap, I = Ct(
     f,
     H,
     (j % 10 + 10) % 10,
     q + 1,
     !0,
     !0
-  ), F = qt(J, s), Q = {};
-  F.forEach((d) => {
-    Q[d.starId] = d.type;
+  ), F = qt(J, l), Q = {};
+  F.forEach((m) => {
+    Q[m.starId] = m.type;
   });
-  const N = Xn(I, Y, (j % 10 + 10) % 10), U = {
-    ..._,
-    ...x.lucky,
-    ...x.sha,
-    ...x.misc
+  const N = Xn(M, _, (j % 10 + 10) % 10), U = {
+    ...Y,
+    ...I.lucky,
+    ...I.sha,
+    ...I.misc
   };
-  N.forEach((d) => {
-    const w = d.branchIndex;
-    for (const [y, E] of Object.entries(_))
-      E === w && d.mainStars.push(y);
-    for (const [y, E] of Object.entries(x.lucky))
-      E === w && d.minorStars.push(y);
-    for (const [y, E] of Object.entries(x.sha))
-      E === w && d.shaStars.push(y);
-    for (const [y, E] of Object.entries(x.misc))
-      E === w && d.miscStars.push(y);
+  N.forEach((m) => {
+    const E = m.branchIndex;
+    for (const [y, S] of Object.entries(Y))
+      S === E && m.mainStars.push(y);
+    for (const [y, S] of Object.entries(I.lucky))
+      S === E && m.minorStars.push(y);
+    for (const [y, S] of Object.entries(I.sha))
+      S === E && m.shaStars.push(y);
+    for (const [y, S] of Object.entries(I.misc))
+      S === E && m.miscStars.push(y);
     for (const y of F)
-      U[y.starId] === w && d.hua.push(y.type);
+      U[y.starId] === E && m.hua.push(y.type);
   });
-  const In = vt(
-    I,
-    Y,
+  const Mn = vt(
+    M,
+    _,
     (j % 10 + 10) % 10,
     q + 1,
-    u,
+    r,
     P
   );
-  Kt(N, _, P, Q);
-  const xn = F.map((d) => ({
-    starId: d.starId,
-    type: d.type,
-    palaceIndex: U[d.starId] || 0
-  })), Bn = N.map((d, w) => ({
-    ...d,
-    name: tn[w]
+  Kt(N, Y, P, Q);
+  const In = F.map((m) => ({
+    starId: m.starId,
+    type: m.type,
+    palaceIndex: U[m.starId] || 0
+  })), Bn = N.map((m, E) => ({
+    ...m,
+    name: tn[E]
   }));
   return {
     input: n,
     fourPillars: {
-      year: `${J}${En}`,
-      month: `${M.monthPillar.stem}${M.monthPillar.branch}`,
-      day: `${M.dayPillar.stem}${M.dayPillar.branch}`,
-      hour: `${M.hourPillar.stem}${M.hourPillar.branch}`
+      year: `${J}${Sn}`,
+      month: `${T.monthPillar.stem}${T.monthPillar.branch}`,
+      day: `${T.dayPillar.stem}${T.dayPillar.branch}`,
+      hour: `${T.hourPillar.stem}${T.hourPillar.branch}`
     },
-    mingPalace: I,
-    shenPalace: Y,
+    mingPalace: M,
+    shenPalace: _,
     elementPhase: P,
     palaces: Bn,
-    mingMaster: Tn,
-    shenMaster: Mn,
-    hua: xn,
-    greatLimits: In
+    mingMaster: bn,
+    shenMaster: Tn,
+    hua: In,
+    greatLimits: Mn
   };
 }
-function Ae(n, t, e, a, i = 0, r = "男", u = "sanhe") {
+function qe(n, t, e, a, i = 0, o = "男", r = "sanhe") {
   return Vt({
     year: n,
     month: t,
     day: e,
     hour: a,
     minute: i,
-    gender: r,
-    school: u,
+    gender: o,
+    school: r,
     isLunar: !1
   });
 }
@@ -1461,15 +1436,15 @@ function ne(n) {
     e.push(fn[a]);
   return e;
 }
-function qe(n, t) {
+function Pe(n, t) {
   const a = {
     水二局: "水",
     木三局: "木",
     金四局: "金",
     土五局: "土",
     火六局: "火"
-  }[n], r = ((yn[a].branch - t) % 12 + 12) % 12;
-  return fn[r];
+  }[n], o = ((yn[a].branch - t) % 12 + 12) % 12;
+  return fn[o];
 }
 const pn = {
   ziwei: {
@@ -1683,13 +1658,13 @@ const pn = {
     symbolism: ["破旧立新", "破坏", "消耗", "变革", "冒险"]
   }
 }, te = ["ziwei", "tianji", "taiyang", "wuqu", "tiantong", "lianzhen"], ee = ["tianfu", "taiyin", "tanlang", "jumen", "tianxiang", "tianliang", "qisha", "pojun"], ae = [...te, ...ee];
-function Pe(n) {
+function ze(n) {
   return pn[n];
 }
-function ze() {
+function ve() {
   return ae.map((n) => pn[n]);
 }
-const Sn = {
+const wn = {
   zuobi: {
     id: "zuobi",
     name: "左辅",
@@ -2032,11 +2007,19 @@ const Sn = {
     rule: "天福与月支相关",
     description: "福星，主福气、享受。"
   }
-}, ve = Object.keys(Sn);
-function He(n) {
-  return Sn[n];
+}, He = Object.keys(wn);
+function _e(n) {
+  return wn[n];
 }
 const ie = {
+  miao: "庙",
+  wang: "旺",
+  de: "得地",
+  li: "利益",
+  ping: "平和",
+  bu: "不得地",
+  xian: "落陷"
+}, oe = {
   庙: 5,
   旺: 4,
   得地: 3,
@@ -2045,600 +2028,40 @@ const ie = {
   不得地: -1,
   落陷: -2
 }, re = {
-  // ---- 14主星 ----
-  ziwei: [
-    "庙",
-    // 子
-    "旺",
-    // 丑
-    "得地",
-    // 寅
-    "旺",
-    // 卯
-    "得地",
-    // 辰
-    "旺",
-    // 巳
-    "庙",
-    // 午
-    "旺",
-    // 未
-    "得地",
-    // 申
-    "旺",
-    // 酉
-    "得地",
-    // 戌
-    "旺"
-    // 亥
-  ],
-  tianji: [
-    "得地",
-    // 子
-    "不得地",
-    // 丑
-    "利益",
-    // 寅
-    "旺",
-    // 卯
-    "不得地",
-    // 辰
-    "利益",
-    // 巳
-    "落陷",
-    // 午
-    "旺",
-    // 未
-    "利益",
-    // 申
-    "旺",
-    // 酉
-    "落陷",
-    // 戌
-    "平和"
-    // 亥
-  ],
-  taiyang: [
-    "落陷",
-    // 子
-    "落陷",
-    // 丑
-    "得地",
-    // 寅
-    "旺",
-    // 卯
-    "旺",
-    // 辰
-    "庙",
-    // 巳
-    "庙",
-    // 午
-    "庙",
-    // 未
-    "旺",
-    // 申
-    "得地",
-    // 酉
-    "落陷",
-    // 戌
-    "落陷"
-    // 亥
-  ],
-  wuqu: [
-    "旺",
-    // 子
-    "庙",
-    // 丑
-    "得地",
-    // 寅
-    "庙",
-    // 卯
-    "庙",
-    // 辰
-    "旺",
-    // 巳
-    "庙",
-    // 午
-    "得地",
-    // 未
-    "平",
-    // 申
-    "旺",
-    // 酉
-    "落陷",
-    // 戌
-    "得地"
-    // 亥
-  ],
-  tiantong: [
-    "庙",
-    // 子
-    "不得地",
-    // 丑
-    "利益",
-    // 寅
-    "旺",
-    // 卯
-    "利益",
-    // 辰
-    "旺",
-    // 巳
-    "落陷",
-    // 午
-    "庙",
-    // 未
-    "旺",
-    // 申
-    "旺",
-    // 酉
-    "得地",
-    // 戌
-    "平和"
-    // 亥
-  ],
-  lianzhen: [
-    "旺",
-    // 子
-    "平和",
-    // 丑
-    "平和",
-    // 寅
-    "落陷",
-    // 卯
-    "利益",
-    // 辰
-    "庙",
-    // 巳
-    "庙",
-    // 午
-    "得地",
-    // 未
-    "利益",
-    // 申
-    "旺",
-    // 酉
-    "落陷",
-    // 戌
-    "旺"
-    // 亥
-  ],
-  tianfu: [
-    "庙",
-    // 子
-    "旺",
-    // 丑
-    "得地",
-    // 寅
-    "旺",
-    // 卯
-    "得地",
-    // 辰
-    "庙",
-    // 巳
-    "庙",
-    // 午
-    "旺",
-    // 未
-    "得地",
-    // 申
-    "旺",
-    // 酉
-    "得地",
-    // 戌
-    "庙"
-    // 亥
-  ],
-  taiyin: [
-    "庙",
-    // 子
-    "庙",
-    // 丑
-    "得地",
-    // 寅
-    "旺",
-    // 卯
-    "落陷",
-    // 辰
-    "利益",
-    // 巳
-    "落陷",
-    // 午
-    "庙",
-    // 未
-    "庙",
-    // 申
-    "旺",
-    // 酉
-    "得地",
-    // 戌
-    "平和"
-    // 亥
-  ],
-  tanlang: [
-    "旺",
-    // 子
-    "不得地",
-    // 丑
-    "旺",
-    // 寅
-    "落陷",
-    // 卯
-    "庙",
-    // 辰
-    "得地",
-    // 巳
-    "落陷",
-    // 午
-    "旺",
-    // 未
-    "庙",
-    // 申
-    "旺",
-    // 酉
-    "落陷",
-    // 戌
-    "庙"
-    // 亥
-  ],
-  jumen: [
-    "庙",
-    // 子
-    "旺",
-    // 丑
-    "平和",
-    // 寅
-    "旺",
-    // 卯
-    "落陷",
-    // 辰
-    "旺",
-    // 巳
-    "庙",
-    // 午
-    "得地",
-    // 未
-    "利益",
-    // 申
-    "旺",
-    // 酉
-    "落陷",
-    // 戌
-    "平和"
-    // 亥
-  ],
-  tianxiang: [
-    "庙",
-    // 子
-    "得地",
-    // 丑
-    "得地",
-    // 寅
-    "平和",
-    // 卯
-    "庙",
-    // 辰
-    "庙",
-    // 巳
-    "落陷",
-    // 午
-    "得地",
-    // 未
-    "旺",
-    // 申
-    "平和",
-    // 酉
-    "庙",
-    // 戌
-    "旺"
-    // 亥
-  ],
-  tianliang: [
-    "庙",
-    // 子
-    "得地",
-    // 丑
-    "庙",
-    // 寅
-    "旺",
-    // 卯
-    "得地",
-    // 辰
-    "旺",
-    // 巳
-    "落陷",
-    // 午
-    "得地",
-    // 未
-    "庙",
-    // 申
-    "旺",
-    // 酉
-    "得地",
-    // 戌
-    "旺"
-    // 亥
-  ],
-  qisha: [
-    "旺",
-    // 子
-    "得地",
-    // 丑
-    "旺",
-    // 寅
-    "庙",
-    // 卯
-    "得地",
-    // 辰
-    "旺",
-    // 巳
-    "庙",
-    // 午
-    "得地",
-    // 未
-    "旺",
-    // 申
-    "庙",
-    // 酉
-    "落陷",
-    // 戌
-    "旺"
-    // 亥
-  ],
-  pojun: [
-    "庙",
-    // 子
-    "旺",
-    // 丑
-    "旺",
-    // 寅
-    "平和",
-    // 卯
-    "得地",
-    // 辰
-    "得地",
-    // 巳
-    "落陷",
-    // 午
-    "旺",
-    // 未
-    "庙",
-    // 申
-    "得地",
-    // 酉
-    "落陷",
-    // 戌
-    "旺"
-    // 亥
-  ],
-  // ---- 辅星 ----
-  zuobi: [
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null
-  ],
-  youbi: [
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null
-  ],
-  wenchang: [
-    "旺",
-    // 子
-    "庙",
-    // 丑
-    "得地",
-    // 寅
-    "旺",
-    // 卯
-    "庙",
-    // 辰
-    "旺",
-    // 巳
-    "落陷",
-    // 午
-    "平和",
-    // 未
-    "得地",
-    // 申
-    "旺",
-    // 酉
-    "庙",
-    // 戌
-    "得地"
-    // 亥
-  ],
-  wenqu: [
-    "旺",
-    // 子
-    "庙",
-    // 丑
-    "得地",
-    // 寅
-    "旺",
-    // 卯
-    "庙",
-    // 辰
-    "旺",
-    // 巳
-    "落陷",
-    // 午
-    "平和",
-    // 未
-    "得地",
-    // 申
-    "旺",
-    // 酉
-    "庙",
-    // 戌
-    "得地"
-    // 亥
-  ],
-  tiankui: [
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null
-  ],
-  tianyue: [
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null
-  ],
-  lucun: [
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null
-  ],
-  tianma: [
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null
-  ],
-  // ---- 煞星 ----
-  qingyang: [
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null
-  ],
-  tuoluo: [
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null
-  ],
-  huoxing: [
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null
-  ],
-  lingxing: [
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null
-  ],
-  dikong: [
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null
-  ],
-  dijie: [
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null
-  ]
+  ziwei: ["wang", "wang", "de", "wang", "miao", "miao", "wang", "wang", "de", "wang", "ping", "miao"],
+  tianji: ["de", "wang", "li", "ping", "miao", "xian", "de", "wang", "li", "ping", "miao", "xian"],
+  taiyang: ["wang", "miao", "wang", "wang", "wang", "de", "de", "xian", "bu", "xian", "xian", "bu"],
+  wuqu: ["de", "li", "miao", "ping", "wang", "miao", "de", "li", "miao", "ping", "wang", "miao"],
+  tiantong: ["li", "ping", "ping", "miao", "xian", "bu", "wang", "ping", "ping", "miao", "wang", "bu"],
+  lianzhen: ["miao", "ping", "li", "xian", "ping", "li", "miao", "ping", "li", "xian", "ping", "li"],
+  tianfu: ["miao", "de", "miao", "de", "wang", "miao", "de", "wang", "miao", "de", "miao", "miao"],
+  taiyin: ["wang", "xian", "xian", "xian", "bu", "bu", "li", "bu", "wang", "miao", "miao", "miao"],
+  tanlang: ["ping", "li", "miao", "xian", "wang", "miao", "ping", "li", "miao", "xian", "wang", "miao"],
+  jumen: ["miao", "miao", "xian", "wang", "wang", "bu", "miao", "miao", "xian", "wang", "wang", "bu"],
+  tianxiang: ["miao", "xian", "de", "de", "miao", "de", "miao", "xian", "de", "de", "miao", "miao"],
+  tianliang: ["miao", "miao", "miao", "xian", "miao", "wang", "xian", "de", "miao", "xian", "miao", "wang"],
+  qisha: ["miao", "wang", "miao", "ping", "wang", "miao", "miao", "miao", "miao", "ping", "wang", "miao"],
+  pojun: ["de", "xian", "wang", "ping", "miao", "wang", "de", "xian", "wang", "ping", "miao", "wang"],
+  wenchang: ["xian", "li", "de", "miao", "xian", "li", "de", "miao", "xian", "li", "de", "miao"],
+  wenqu: ["ping", "wang", "de", "miao", "xian", "wang", "de", "miao", "xian", "wang", "de", "miao"],
+  zuobi: ["de", "miao", "xian", "li", "de", "miao", "xian", "li", "de", "miao", "xian", "li"],
+  youbi: ["de", "miao", "xian", "li", "de", "miao", "xian", "li", "de", "miao", "xian", "li"],
+  tiankui: ["miao", "wang", "de", "miao", "xian", "li", "miao", "wang", "de", "miao", "xian", "li"],
+  tianyue: ["miao", "wang", "de", "miao", "xian", "li", "miao", "wang", "de", "miao", "xian", "li"],
+  lucun: ["miao", "wang", "de", "miao", "xian", "li", "miao", "wang", "de", "miao", "xian", "li"],
+  qingyang: ["", "xian", "miao", "", "xian", "miao", "", "xian", "miao", "", "xian", "miao"],
+  tuoluo: ["xian", "", "miao", "xian", "", "miao", "xian", "", "miao", "xian", "", "miao"],
+  huoxing: ["miao", "li", "xian", "de", "miao", "li", "xian", "de", "miao", "li", "xian", "de"],
+  lingxing: ["miao", "li", "xian", "de", "miao", "li", "xian", "de", "miao", "li", "xian", "de"],
+  tianma: ["xian", "li", "wang", "miao", "xian", "li", "wang", "miao", "xian", "li", "wang", "miao"]
 };
 function Ye(n, t) {
-  const e = re[n];
-  return e ? e[t - 1] ?? null : null;
+  var i;
+  const e = ((t - 1) % 12 + 12) % 12, a = (i = re[n]) == null ? void 0 : i[e];
+  return a ? ie[a] ?? null : null;
 }
-function _e(n) {
-  return n ? ie[n] ?? 0 : 0;
+function Fe(n) {
+  return n ? oe[n] ?? 0 : 0;
 }
 const ue = {
   ziwei: { id: "ziwei", nameCn: "紫微", nameEn: "Zi Wei", aliases: ["北极", "帝星"] },
@@ -2683,12 +2106,12 @@ const ue = {
   santai: { id: "santai", nameCn: "三台", nameEn: "San Tai", aliases: ["台星"] },
   bazuo: { id: "bazuo", nameCn: "八座", nameEn: "Ba Zuo", aliases: ["座星"] }
 };
-function Fe(n) {
+function Ne(n) {
   for (const [t, e] of Object.entries(ue))
     if (e.nameCn === n || e.aliases.includes(n))
       return t;
 }
-const oe = {
+const ce = {
   sanhe: {
     name: "San He",
     nameCn: "三合派",
@@ -2718,28 +2141,27 @@ const oe = {
     specialRules: ["特殊安星", "临床应用角度"]
   }
 };
-function Ne(n, t) {
-  return T(n);
+function De(n, t) {
+  return b(n);
 }
-function De(n) {
+function Re(n) {
   var t;
-  return ((t = oe[n]) == null ? void 0 : t.nameCn) || "三合派";
+  return ((t = ce[n]) == null ? void 0 : t.nameCn) || "三合派";
 }
 export {
-  re as BRIGHTNESS_TABLE,
-  ie as BRIGHTNESS_VALUE,
+  oe as BRIGHTNESS_VALUE,
   Hn as CITY_LOCATIONS,
-  b as EARTH_BRANCHES,
+  x as EARTH_BRANCHES,
   Lt as FEIXING_HUA,
-  S as HEAVENLY_STEMS,
+  w as HEAVENLY_STEMS,
   pn as MAIN_STARS,
   ae as MAIN_STAR_IDS,
-  Sn as MINOR_STARS,
-  ve as MINOR_STAR_IDS,
+  wn as MINOR_STARS,
+  He as MINOR_STAR_IDS,
   At as NISHI_HUA,
   tn as PALACE_NAMES,
-  Ct as SANHE_HUA,
-  oe as SCHOOL_CONFIGS,
+  kt as SANHE_HUA,
+  ce as SCHOOL_CONFIGS,
   Ot as SIHUA_HUA,
   Pn as SOLAR_TERMS,
   ue as STAR_NAMES,
@@ -2760,7 +2182,7 @@ export {
   ne as calcTwelveLongevities,
   Kn as calcZiweiPosition,
   Vt as createChart,
-  rn as dayCountToSolar,
+  on as dayCountToSolar,
   Kt as detectAllPatterns,
   Wt as detectFuXiangChaoYuan,
   Dt as detectJiYueTongLiang,
@@ -2769,66 +2191,66 @@ export {
   Gt as detectRiYueBingMing,
   Zt as detectRiYueFanBei,
   Nt as detectShaPoLang,
-  Oe as detectXingQiuJiaYin,
+  Ae as detectXingQiuJiaYin,
   $t as detectXiongSuQianYuan,
   Xt as detectYueLangTianMen,
   Rt as detectZiFuTongGong,
   Ee as findCityLocation,
-  Fe as findStarIdByCnName,
-  we as get14MainStarsPlacement,
-  ze as getAllMainStars,
+  Ne as findStarIdByCnName,
+  xe as get14MainStarsPlacement,
+  ve as getAllMainStars,
   qt as getAllMingHua,
   de as getBranchByIndex,
-  se as getBranchIndex,
-  _e as getBrightnessScore,
-  je as getCurrentGreatLimit,
-  Be as getDailyHua,
+  me as getBranchIndex,
+  Fe as getBrightnessScore,
+  Ce as getCurrentGreatLimit,
+  je as getDailyHua,
   On as getDayPillar,
   Me as getDecadeHua,
-  Le as getFlowDayPalace,
+  Oe as getFlowDayPalace,
   Ft as getFlowMonthPalace,
   qn as getFourPillars,
   Ht as getGreatLimitAtAge,
   An as getHourPillar,
-  T as getHuaByStem,
-  ye as getLeapMonth,
-  qe as getLongevityByPalace,
-  Pe as getMainStar,
-  He as getMinorStar,
-  he as getMonthDays,
+  b as getHuaByStem,
+  pe as getLeapMonth,
+  Pe as getLongevityByPalace,
+  ze as getMainStar,
+  _e as getMinorStar,
+  fe as getMonthDays,
   Ln as getMonthPillar,
-  xe as getMonthlyHua,
+  Be as getMonthlyHua,
   Zn as getPalaceBranches,
   be as getPhaseElement,
   at as getPhaseNumber,
-  Ne as getSchoolHua,
-  De as getSchoolName,
+  De as getSchoolHua,
+  Re as getSchoolName,
   en as getSolarMonthDays,
   zn as getSolarTermDate,
   Se as getSolarTermMonth,
-  pe as getSolarTermNames,
-  fe as getSpringFestival,
-  C as getSpringFestivalOffset,
+  we as getSolarTermNames,
+  ye as getSpringFestival,
+  k as getSpringFestivalOffset,
   Ye as getStarBrightness,
   Te as getStarHua,
-  me as getStemByIndex,
-  ge as getStemIndex,
+  ge as getStemByIndex,
+  he as getStemIndex,
   Dn as getTimeBranchIndex,
   ke as getYearBranch,
-  kn as getYearDays,
-  Ce as getYearHua,
-  _t as getYearPalaceIndex,
-  Cn as getYearPillar,
-  Yt as getYearStem,
+  Cn as getYearDays,
+  Le as getYearHua,
+  Yt as getYearPalaceIndex,
+  kn as getYearPillar,
+  _t as getYearStem,
   Ie as getYearlyHua,
   vn as hasPassedSpringStart,
   R as isBeforeSolarTerm,
   zt as isGreatLimitForward,
   Z as isSolarLeapYear,
   Pt as isYearStemYang,
-  on as lunarToSolar,
-  cn as placeMainStars,
-  Ae as quickChart,
+  un as lunarToSolar,
+  sn as placeMainStars,
+  qe as quickChart,
   an as solarToDayCount,
-  un as solarToLunar
+  rn as solarToLunar
 };

@@ -179,9 +179,9 @@ export function detectXingQiuJiaYin(starMap: Record<string, number>, palaces: Pa
   const xiangIndex = starMap['tianxiang']
   if (!xiangIndex) return false
   
-  // 天相在前一宫为擎羊（或廉贞）
-  // 天相在后一宫为另一
-  // 需要实际星曜位置
+  // TODO: 星桥夹印（天相被擎羊和廉贞夹）实现待完善
+  // 需检查天相前后宫是否分别为擎羊/廉贞（夹宫关系）
+  // 当前为恒false桩函数，未注册进PATTERN_DETECTORS
   return false  // 待完善
 }
 

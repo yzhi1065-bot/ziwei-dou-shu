@@ -12,7 +12,7 @@
           <option v-for="i in 12" :key="i" :value="i">{{ i }}月</option>
         </select>
         <select v-model.number="d" class="border rounded px-1 py-0.5">
-          <option v-for="i in 31" :key="i" :value="i">{{ i }}日</option>
+          <option v-for="i in maxDays" :key="i" :value="i">{{ i }}日</option>
         </select>
         <select v-model.number="h" class="border rounded px-1 py-0.5">
           <option v-for="t in shichen" :key="t.idx" :value="t.idx">{{ t.name }} {{ t.range }}</option>
@@ -105,6 +105,18 @@ const shichen = [
   { idx: 12, name: '晚子时', range: '23:00-24:00' },
 ]
 const curTab = computed(() => tabs.find(t => t.k === tab.value))
+
+// 按年月动态计算当月最大天数（含闰年2月）
+const maxDays = computed(() => {
+  const yv = y.value, mv = m.value
+  if (mv === 2) {
+    const leap = (yv % 4 === 0 && yv % 100 !== 0) || yv % 400 === 0
+    return leap ? 29 : 28
+  }
+  return [4, 6, 9, 11].includes(mv) ? 30 : 31
+})
+// 防止日超出当月天数
+watch(maxDays, (md) => { if (d.value > md) d.value = md })
 
 const huaNames = ['化禄','化权','化科','化忌']
 const huaColors = ['#27AE60','#8E44AD','#3498DB','#E74C3C']

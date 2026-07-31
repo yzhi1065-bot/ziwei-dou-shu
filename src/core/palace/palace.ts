@@ -102,12 +102,11 @@ export function getPalaceBranches(mingIndex: number): number[] {
  * 从寅宫起正月，命宫地支为某月，推出天干
  */
 export function calcPalaceStem(yearStemIndex: number, palaceBranchIndex: number): HeavenlyStem {
-  // 寅宫对应的正月天干起始
-  const monthStartTable = [2, 4, 6, 8, 0]  // 年干0,2,4,6,8对应的正月天干
-  
-  // 年干偶数分组的序号（0~4）
-  const groupIdx = Math.floor((yearStemIndex % 10) / 2)
-  const startStem = monthStartTable[groupIdx]
+  // 五虎遁：寅宫正月天干起始
+  // 甲己→丙(2), 乙庚→戊(4), 丙辛→庚(6), 丁壬→壬(8), 戊癸→甲(0)
+  // 公式：startStem = (年干索引 * 2 + 2) % 10
+  // 验证：甲0→2✓ 乙1→4✓ 丙2→6✓ 丁3→8✓ 戊4→0✓ 己5→2✓ 庚6→4✓ 辛7→6✓ 壬8→8✓ 癸9→0✓
+  const startStem = ((yearStemIndex % 10) * 2 + 2) % 10
   
   // 寅=3，寅宫天干=startStem
   // 地支比寅多几，天干就加几

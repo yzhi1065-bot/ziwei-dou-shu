@@ -104,13 +104,18 @@ export const useChartStore = defineStore('chart', () => {
 
       // === 飞星四化连线（每宫天干四化 → 目标宫）===
       const flyLines: FlyLine[] = []
+      // 建立星名→宫位索引（O(1)查询替代嵌套find）
+      const starPalaceMap = new Map<string, any>()
+      a.palaces.forEach((pp: any) => {
+        ;[...(pp.majorStars||[]), ...(pp.minorStars||[])].forEach((s: any) => {
+          if (!starPalaceMap.has(s.name)) starPalaceMap.set(s.name, pp)
+        })
+      })
       a.palaces.forEach((p:any) => {
         const fromBi = EB.indexOf(p.earthlyBranch)
         const stars4 = GAN_HUA_TABLE[p.heavenlyStem] || []
         stars4.forEach((starName:string, si:number) => {
-          const target = a.palaces.find((pp:any) =>
-            [...(pp.majorStars||[]), ...(pp.minorStars||[])].some((s:any) => s.name === starName)
-          )
+          const target = starPalaceMap.get(starName)
           if (target && target !== p) {
             flyLines.push({
               fromBranch: fromBi,

@@ -130,22 +130,6 @@ export function calcTuoLuo(luCunBranch: number): number {
  * 简化处理：使用年支四组定位
  */
 export function calcHuoXing(yearBranchIndex: number, timeBranchIndex: number): number {
-  // 年支分组，确定起始宫
-  const startTable: Record<number, number> = {
-    3: 10,   // 寅 → 从丑(10)起  ... wait, 丑=2
-    7: 3,    // 午 → 寅(3)
-    11: 2,   // 戌 → 丑(2)
-    1: 3,    // 子 → 寅(3)
-    5: 3,    // 辰 → 寅(3)
-    9: 3,    // 申 → 寅(3)
-    4: 4,    // 卯 → 卯(4)
-    8: 4,    // 未 → 卯(4)
-    12: 4,   // 亥 → 卯(4)
-    2: 10,   // 丑 → 酉(10)
-    6: 10,   // 巳 → 酉(10)
-    10: 10,  // 酉 → 酉(10)
-  }
-  
   // 火星规则：寅午戌人丑卯酉，申子辰人寅卯丑
   // （简化版：四种年支组的火星定位不同）
   const fireGroup: Record<number, { start: number; forward: boolean }> = {
@@ -334,7 +318,7 @@ export function calcTianGuan(month: number): number {
   return ((2 + month - 1) % 12) + 1
 }
 
-export function calcTianFu2(month: number): number {
+export function calcTianFuMisc(month: number): number {
   // 天福从寅起正月，顺数
   return ((2 + month - 1) % 12) + 1
 }
@@ -406,7 +390,7 @@ export function placeAllMinorStars(
     misc['santai'] = calcSanTai(timeBranchIndex)
     misc['bazuo'] = calcBaZuo(timeBranchIndex)
     misc['tianguan'] = calcTianGuan(month)
-    misc['tianfu2'] = calcTianFu2(month)
+    misc['tianfu2'] = calcTianFuMisc(month)
     misc['taifu'] = calcTaiFu(timeBranchIndex)
     misc['fenghao'] = calcFengGao(timeBranchIndex)
   }
