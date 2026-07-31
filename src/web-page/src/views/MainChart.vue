@@ -6,7 +6,7 @@
       <span class="bg-mibai px-2 py-0.5 rounded border text-xs">四柱：<b>{{ fp?.year }} {{ fp?.month }} {{ fp?.day }} {{ fp?.hour }}时</b></span>
       <span class="bg-mibai px-2 py-0.5 rounded border text-xs">{{ chart.elementPhase }}</span>
       <span class="bg-mibai px-2 py-0.5 rounded border text-xs">命{{ chart.mingMaster }} 身{{ chart.shenMaster }}</span>
-      <button @click="saveChart" class="ml-auto px-2 py-0.5 text-xs rounded bg-zheshi text-white">💾保存</button>
+      <button @click="saveChart" class="ml-auto px-2 py-0.5 text-xs rounded bg-zheshi text-white">{{ saved ? '✅ 已保存' : '💾保存' }}</button>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
@@ -126,12 +126,7 @@ import { useChartStore } from '../stores/chart'
 import ZiweiPlate from '../components/ZiweiPlate.vue'
 
 const store = useChartStore()
-// 优先用store里的最新数据（generateChart已填充selfArrows/flyLines）
-// 只有store为空时才从window读取（防止旧数据覆盖新数据）
-if (!store.chartResult) {
-  const winData = (window as any).__CHART_DATA
-  if (winData) store.chartResult = winData
-}
+// 直接读Pinia store（路由切换不丢数据）
 const chart = computed(() => store.chartResult)
 // 飞星派才显示飞线+自化箭头
 const isFeixing = computed(() => (chart.value?.school || 'sanhe') === 'feixing')
@@ -170,6 +165,7 @@ const limits = computed(() => {
   return p.filter((p2:any) => p2.decadal).map((p2:any) => ({ n: p2.name, d: p2.decadal.range.join('-'), a: age >= p2.decadal.range[0] && age <= p2.decadal.range[1] }))
 })
 
+const saved = ref(false)
 function saveChart() {
   // 保存完整chart数据（含palaces/自化/飞线等）
   store.saveRecord({
@@ -180,15 +176,14 @@ function saveChart() {
     elementPhase: chart.value.elementPhase,
     fullData: chart.value,
   })
-  const btn = document.activeElement as HTMLElement
-  if (btn) { btn.textContent = '✅'; setTimeout(() => { btn.textContent = '💾保存' }, 1500) }
+  saved.value = true
+  setTimeout(() => { saved.value = false }, 1500)
 }
 
 function loadRecord(r: any) {
   if (r.fullData) {
-    // 恢复完整命盘
+    // 恢复完整命盘（走Pinia store，路由切换不丢）
     store.chartResult = r.fullData
-    ;(window as any).__CHART_DATA = r.fullData
     return
   }
   // 兼容旧记录：重新排盘

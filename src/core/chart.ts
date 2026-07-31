@@ -102,8 +102,9 @@ export function createChart(input: ChartInput): ChartResult {
   )
   
   // 9. 四化（本命四化）
-  const mingStemForHua = yearStem
-  const huaList = getAllMingHua(mingStemForHua, school as School)
+  // 本命四化以生年天干起
+  const yearStemForHua = yearStem
+  const huaList = getAllMingHua(yearStemForHua, school as School)
   
   // 构建四化映射
   const huaMap: Record<string, HuaType> = {}

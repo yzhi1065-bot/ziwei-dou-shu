@@ -54,6 +54,8 @@ export const SANHE_HUA: Record<string, [string, string, string, string]> = {
  * 飞星派四化表（与中州派略有差异）
  * 主要差异在部分星曜的化权/化科不同
  */
+// TODO: 飞星派/四化派/倪师派四化表目前与三合派相同，需查阅各派典籍补充差异
+// 已知差异参考：飞星派甲干无廉贞化禄之争、钦天派丙干天同化禄等，待考证后更新
 export const FEIXING_HUA: Record<string, [string, string, string, string]> = {
   '甲': ['lianzhen', 'pojun', 'wuqu', 'taiyang'],
   '乙': ['tianji', 'tianliang', 'ziwei', 'taiyin'],

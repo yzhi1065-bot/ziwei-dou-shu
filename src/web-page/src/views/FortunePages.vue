@@ -15,7 +15,7 @@
           <option v-for="i in 31" :key="i" :value="i">{{ i }}日</option>
         </select>
         <select v-model.number="h" class="border rounded px-1 py-0.5">
-          <option v-for="i in 12" :key="i" :value="(i-1)*2">{{ (i-1)*2 }}:00-{{ i*2 }}:00</option>
+          <option v-for="t in shichen" :key="t.idx" :value="t.idx">{{ t.name }} {{ t.range }}</option>
         </select>
         <button @click="calc" class="ml-2 px-3 py-0.5 rounded bg-zheshi text-white text-xs">推演</button>
       </div>
@@ -88,6 +88,22 @@ const tabs = [
   { k: 'daily', n: '流日' },
   { k: 'hourly', n: '流时' },
 ]
+// 十二时辰（iztro timeIndex: 0=子时00:00, 1=丑时... 11=亥时, 12=晚子时23:00）
+const shichen = [
+  { idx: 0, name: '早子时', range: '00:00-01:00' },
+  { idx: 1, name: '丑时', range: '01:00-03:00' },
+  { idx: 2, name: '寅时', range: '03:00-05:00' },
+  { idx: 3, name: '卯时', range: '05:00-07:00' },
+  { idx: 4, name: '辰时', range: '07:00-09:00' },
+  { idx: 5, name: '巳时', range: '09:00-11:00' },
+  { idx: 6, name: '午时', range: '11:00-13:00' },
+  { idx: 7, name: '未时', range: '13:00-15:00' },
+  { idx: 8, name: '申时', range: '15:00-17:00' },
+  { idx: 9, name: '酉时', range: '17:00-19:00' },
+  { idx: 10, name: '戌时', range: '19:00-21:00' },
+  { idx: 11, name: '亥时', range: '21:00-23:00' },
+  { idx: 12, name: '晚子时', range: '23:00-24:00' },
+]
 const curTab = computed(() => tabs.find(t => t.k === tab.value))
 
 const huaNames = ['化禄','化权','化科','化忌']
@@ -96,7 +112,7 @@ const flowNames = ['兄弟','夫妻','子女','财帛','疾厄','迁移','仆役
 
 function calc() {
   const a = store.rawAstrolabe
-  if (!a) return
+  if (!a) { data.value = null; return }
   try {
     const dateStr = `${y.value}-${m.value}-${d.value}`
     const horo = a.horoscope(dateStr)

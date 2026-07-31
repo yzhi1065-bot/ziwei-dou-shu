@@ -135,7 +135,6 @@ async function handleSubmit() {
     form.hour, form.minute,
     form.gender, form.school
   )
-  ;(window as any).__CHART_DATA = chartStore.chartResult
   router.push('/chart')
 }
 </script>

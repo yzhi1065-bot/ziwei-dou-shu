@@ -1,12 +1,25 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import type { ChartDisplayData, ChartRecord, SelfArrow, FlyLine } from '../types'
 
 const EB = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥']
+// TODO: 统一索引体系。当前前端展示层统一0-indexed（EB.indexOf返回0-11），
+// 自研core算法内部部分模块用1-indexed（子=1），iztro返回中文地支。
+// 建议后续将core也统一为0-indexed以消除混用隐患。
+
+// 天干四化表（文墨天机/iztro标准）：天干 → [化禄, 化权, 化科, 化忌]
+export const GAN_HUA_TABLE: Record<string, string[]> = {
+  '甲':['廉贞','破军','武曲','太阳'], '乙':['天机','天梁','紫微','太阴'],
+  '丙':['天同','天机','文昌','廉贞'], '丁':['太阴','天同','天机','巨门'],
+  '戊':['贪狼','太阴','右弼','天机'], '己':['武曲','贪狼','天梁','文曲'],
+  '庚':['太阳','武曲','太阴','天同'], '辛':['巨门','太阳','文曲','文昌'],
+  '壬':['天梁','紫微','左辅','武曲'], '癸':['破军','巨门','太阴','贪狼'],
+}
 
 export const useChartStore = defineStore('chart', () => {
-  const chartResult = ref<any>(null)
+  const chartResult = ref<ChartDisplayData | null>(null)
   const rawAstrolabe = ref<any>(null)
-  const savedRecords = ref<any[]>([])
+  const savedRecords = ref<ChartRecord[]>([])
   // 箭头设置
   const arrowSettings = ref({
     showSelf: true, showFly: true,
@@ -16,20 +29,39 @@ export const useChartStore = defineStore('chart', () => {
     density: 'full' as 'full'|'mini',
   })
 
+  const STORAGE_KEY = 'zw_records'
+  const STORAGE_VERSION = 1
+
   function loadRecords() {
-    try { savedRecords.value = JSON.parse(localStorage.getItem('zw_records') || '[]') } catch { savedRecords.value = [] }
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY)
+      if (!raw) { savedRecords.value = []; return }
+      const parsed = JSON.parse(raw)
+      // 版本化：旧格式（纯数组）自动迁移
+      savedRecords.value = Array.isArray(parsed) ? parsed : (parsed.records || [])
+    } catch {
+      savedRecords.value = []
+    }
   }
 
-  function saveRecord(record: any) {
+  function saveRecord(record: ChartRecord) {
     loadRecords()
     savedRecords.value.unshift({ id: Date.now(), savedAt: new Date().toLocaleString('zh-CN'), ...record })
     if (savedRecords.value.length > 20) savedRecords.value.length = 20
-    localStorage.setItem('zw_records', JSON.stringify(savedRecords.value))
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: STORAGE_VERSION, records: savedRecords.value }))
+    } catch (e) {
+      console.warn('历史记录保存失败（可能超出localStorage容量）:', e)
+    }
   }
 
   function deleteRecord(idx: number) {
     savedRecords.value.splice(idx, 1)
-    localStorage.setItem('zw_records', JSON.stringify(savedRecords.value))
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: STORAGE_VERSION, records: savedRecords.value }))
+    } catch (e) {
+      console.warn('历史记录删除保存失败:', e)
+    }
   }
 
   async function generateChart(year: number, month: number, day: number, hour: number, minute: number, gender: string = '男', school: string = 'sanhe') {
@@ -44,7 +76,7 @@ export const useChartStore = defineStore('chart', () => {
       const cd = a.rawDates?.chineseDate || {}
 
       // === 提取自化信息 ===
-      const selfArrows:any[] = []
+      const selfArrows: SelfArrow[] = []
       const MUTAGEN_TYPES = ['禄','权','科','忌']
       a.palaces.forEach((p:any) => {
         const bi = EB.indexOf(p.earthlyBranch)
@@ -54,15 +86,8 @@ export const useChartStore = defineStore('chart', () => {
               // 方向: 星在本宫→离心out, 星在对宫→向心in
               // 用mutagen反向查星名
               let starName = ''
-              const hsTable: Record<string,string[]> = {
-                '甲':['廉贞','破军','武曲','太阳'], '乙':['天机','天梁','紫微','太阴'],
-                '丙':['天同','天机','文昌','廉贞'], '丁':['太阴','天同','天机','巨门'],
-                '戊':['贪狼','太阴','右弼','天机'], '己':['武曲','贪狼','天梁','文曲'],
-                '庚':['太阳','武曲','太阴','天同'], '辛':['巨门','太阳','文曲','文昌'],
-                '壬':['天梁','紫微','左辅','武曲'], '癸':['破军','巨门','太阴','贪狼'],
-              }
               const idx = MUTAGEN_TYPES.indexOf(mt)
-              const entry = Object.entries(hsTable).find(([k]) => p.heavenlyStem === k)
+              const entry = Object.entries(GAN_HUA_TABLE).find(([k]) => p.heavenlyStem === k)
               if (entry) starName = entry[1][idx]
               
               // 该星在本宫还是对宫？
@@ -78,17 +103,10 @@ export const useChartStore = defineStore('chart', () => {
       })
 
       // === 飞星四化连线（每宫天干四化 → 目标宫）===
-      const flyLines:any[] = []
-      const hsTableCN: Record<string,string[]> = {
-        '甲':['廉贞','破军','武曲','太阳'], '乙':['天机','天梁','紫微','太阴'],
-        '丙':['天同','天机','文昌','廉贞'], '丁':['太阴','天同','天机','巨门'],
-        '戊':['贪狼','太阴','右弼','天机'], '己':['武曲','贪狼','天梁','文曲'],
-        '庚':['太阳','武曲','太阴','天同'], '辛':['巨门','太阳','文曲','文昌'],
-        '壬':['天梁','紫微','左辅','武曲'], '癸':['破军','巨门','太阴','贪狼'],
-      }
+      const flyLines: FlyLine[] = []
       a.palaces.forEach((p:any) => {
         const fromBi = EB.indexOf(p.earthlyBranch)
-        const stars4 = hsTableCN[p.heavenlyStem] || []
+        const stars4 = GAN_HUA_TABLE[p.heavenlyStem] || []
         stars4.forEach((starName:string, si:number) => {
           const target = a.palaces.find((pp:any) =>
             [...(pp.majorStars||[]), ...(pp.minorStars||[])].some((s:any) => s.name === starName)
@@ -113,14 +131,14 @@ export const useChartStore = defineStore('chart', () => {
       })
 
       // === 大限四化飞线（当前大限宫干）===
-      const decadeFly:any[] = []
+      const decadeFly: FlyLine[] = []
       const age = new Date().getFullYear() - year + 1
       a.palaces.forEach((p:any) => {
         if (!p.decadal) return
         const [s,e] = p.decadal.range
         if (age < s || age > e) return
         const fromBi = EB.indexOf(p.earthlyBranch)
-        const stars4 = hsTableCN[p.decadal.heavenlyStem] || []
+        const stars4 = GAN_HUA_TABLE[p.decadal.heavenlyStem] || []
         stars4.forEach((starName:string, si:number) => {
           const target = a.palaces.find((pp:any) =>
             [...(pp.majorStars||[]), ...(pp.minorStars||[])].some((s:any) => s.name === starName)
@@ -135,7 +153,7 @@ export const useChartStore = defineStore('chart', () => {
       })
 
       // === 大限命宫自化箭头（当前大限宫干 → 命宫自化）===
-      const decadeSelfArrows:any[] = []
+      const decadeSelfArrows: SelfArrow[] = []
       const decadePalace = a.palaces.find((p:any) => {
         if (!p.decadal) return false
         const [s,e] = p.decadal.range
@@ -144,7 +162,7 @@ export const useChartStore = defineStore('chart', () => {
       if (decadePalace) {
         const dstem = decadePalace.decadal.heavenlyStem
         const dBi = EB.indexOf(decadePalace.earthlyBranch)
-        const starsD = hsTableCN[dstem] || []
+        const starsD = GAN_HUA_TABLE[dstem] || []
         starsD.forEach((starName:string, si:number) => {
           const target = a.palaces.find((pp:any) =>
             [...(pp.majorStars||[]), ...(pp.minorStars||[])].some((s:any) => s.name === starName)
@@ -161,10 +179,10 @@ export const useChartStore = defineStore('chart', () => {
       }
 
       // === 流年自化箭头（当年流年天干）===
-      const yearlySelfArrows:any[] = []
+      const yearlySelfArrows: SelfArrow[] = []
       const nowY = new Date()
       const ystem = getYearStem(nowY.getFullYear())
-      const starsYSelf = hsTableCN[ystem] || []
+      const starsYSelf = GAN_HUA_TABLE[ystem] || []
       starsYSelf.forEach((starName:string, si:number) => {
         const target = a.palaces.find((pp:any) =>
           [...(pp.majorStars||[]), ...(pp.minorStars||[])].some((s:any) => s.name === starName)
@@ -178,8 +196,8 @@ export const useChartStore = defineStore('chart', () => {
           })
         }
       })
-      const yearlyFly:any[] = []
-      const starsY = hsTableCN[ystem] || []
+      const yearlyFly: FlyLine[] = []
+      const starsY = GAN_HUA_TABLE[ystem] || []
       starsY.forEach((starName:string, si:number) => {
         const target = a.palaces.find((pp:any) =>
           [...(pp.majorStars||[]), ...(pp.minorStars||[])].some((s:any) => s.name === starName)
@@ -193,7 +211,7 @@ export const useChartStore = defineStore('chart', () => {
         }
       })
 
-      const result = {
+      const result: ChartDisplayData = {
         fourPillars: { year:(cd.yearly||['','']).join(''), month:(cd.monthly||['','']).join(''), day:(cd.daily||['','']).join(''), hour:(cd.hourly||['','']).join('') },
         elementPhase: a.fiveElementsClass||'', mingMaster: a.soul||'', shenMaster: a.body||'',
         gender, school, solarDate: `${year}-${month}-${day}`, timeRange: a.timeRange||'',
