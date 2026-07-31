@@ -30,6 +30,7 @@
     "vitest": "^1.6.0"
   },
   "dependencies": {
+    "iztro": "^2.5.8",
     "lunar-javascript": "^1.7.7"
   }
 }
