@@ -100,13 +100,16 @@
 
     <!-- 历史记录 -->
     <div class="scroll-panel rounded-lg p-3 mt-4" v-if="records.length">
-      <h3 class="font-bold text-sm border-b pb-1 mb-2">历史记录 ({{ records.length }})</h3>
-      <div class="flex flex-wrap gap-2">
+      <div class="flex items-center justify-between border-b pb-1 mb-2 cursor-pointer" @click="recOpen=!recOpen">
+        <h3 class="font-bold text-sm">历史记录 ({{ records.length }})</h3>
+        <span class="text-gray-400 text-xs">{{ recOpen ? '▾ 收起' : '▸ 展开' }}</span>
+      </div>
+      <div v-if="recOpen" class="flex flex-wrap gap-2">
         <div v-for="(r,i) in records" :key="r.id" class="text-xs bg-mibai px-2 py-1 rounded flex items-center gap-2">
           <span>{{ r.fp?.year||'' }}·{{ r.gender }}</span>
           <span class="text-gray-400">{{ r.savedAt }}</span>
-          <button @click="loadRecord(r)" class="text-zheshi">加载</button>
-          <button @click="store.deleteRecord(i);store.loadRecords()" class="text-gray-400">×</button>
+          <button @click="loadRecord(r)" class="text-zheshi hover:underline">加载</button>
+          <button @click="store.deleteRecord(i);store.loadRecords()" class="text-gray-400 hover:text-red-500">×</button>
         </div>
       </div>
     </div>
@@ -141,6 +144,7 @@ const fd = ref(new Date().getDate())
 
 const records = computed(() => store.savedRecords)
 store.loadRecords()
+const recOpen = ref(true)
 
 const selP = computed(() => {
   const p = chart.value?.palaces
@@ -167,9 +171,31 @@ const limits = computed(() => {
 })
 
 function saveChart() {
-  store.saveRecord({ fp: fp.value, gender: chart.value.gender, solarDate: chart.value.solarDate, type: iztroName.value })
+  // 保存完整chart数据（含palaces/自化/飞线等）
+  store.saveRecord({
+    fp: fp.value,
+    gender: chart.value.gender,
+    solarDate: chart.value.solarDate,
+    school: chart.value.school,
+    elementPhase: chart.value.elementPhase,
+    fullData: chart.value,
+  })
   const btn = document.activeElement as HTMLElement
   if (btn) { btn.textContent = '✅'; setTimeout(() => { btn.textContent = '💾保存' }, 1500) }
+}
+
+function loadRecord(r: any) {
+  if (r.fullData) {
+    // 恢复完整命盘
+    store.chartResult = r.fullData
+    ;(window as any).__CHART_DATA = r.fullData
+    return
+  }
+  // 兼容旧记录：重新排盘
+  const d = (r.solarDate || '').split('-')
+  if (d.length >= 3) {
+    store.generateChart(parseInt(d[0]), parseInt(d[1]), parseInt(d[2]), 0, 0, r.gender, r.school || 'sanhe')
+  }
 }
 
 const iztroName = computed(() => chart.value?.elementPhase || '')

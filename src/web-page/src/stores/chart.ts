@@ -20,6 +20,18 @@ export const useChartStore = defineStore('chart', () => {
     try { savedRecords.value = JSON.parse(localStorage.getItem('zw_records') || '[]') } catch { savedRecords.value = [] }
   }
 
+  function saveRecord(record: any) {
+    loadRecords()
+    savedRecords.value.unshift({ id: Date.now(), savedAt: new Date().toLocaleString('zh-CN'), ...record })
+    if (savedRecords.value.length > 20) savedRecords.value.length = 20
+    localStorage.setItem('zw_records', JSON.stringify(savedRecords.value))
+  }
+
+  function deleteRecord(idx: number) {
+    savedRecords.value.splice(idx, 1)
+    localStorage.setItem('zw_records', JSON.stringify(savedRecords.value))
+  }
+
   async function generateChart(year: number, month: number, day: number, hour: number, minute: number, gender: string = '男', school: string = 'sanhe') {
     try {
       const iz = await import('iztro')
@@ -223,7 +235,7 @@ export const useChartStore = defineStore('chart', () => {
     }
   }
 
-  return { chartResult, rawAstrolabe, savedRecords, arrowSettings, generateChart, loadRecords }
+  return { chartResult, rawAstrolabe, savedRecords, arrowSettings, generateChart, loadRecords, saveRecord, deleteRecord }
 })
 
 // 年干计算
