@@ -7,6 +7,8 @@
       <span class="bg-mibai px-2 py-0.5 rounded border text-xs">{{ chart.elementPhase }}</span>
       <span class="bg-mibai px-2 py-0.5 rounded border text-xs">命{{ chart.mingMaster }} 身{{ chart.shenMaster }}</span>
       <button @click="saveChart" class="ml-auto px-2 py-0.5 text-xs rounded bg-zheshi text-white">{{ saved ? '✅ 已保存' : '💾保存' }}</button>
+      <button @click="exportPng" class="px-2 py-0.5 text-xs rounded bg-jinbo text-white">📷导出PNG</button>
+      <button @click="exportJson" class="px-2 py-0.5 text-xs rounded bg-mibai text-gray-700 border">📄JSON</button>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
@@ -189,6 +191,32 @@ function saveChart() {
   })
   saved.value = true
   setTimeout(() => { saved.value = false }, 1500)
+}
+
+// PNG导出（html2canvas截图盘面）
+async function exportPng() {
+  const plate = document.querySelector('.zw-box') as HTMLElement
+  if (!plate) return
+  try {
+    const { default: html2canvas } = await import('html2canvas')
+    const canvas = await html2canvas(plate, { backgroundColor: '#fcf8f0', scale: 2 })
+    const a = document.createElement('a')
+    a.download = `紫微命盘-${chart.value?.solarDate}-${chart.value?.gender}.png`
+    a.href = canvas.toDataURL('image/png')
+    a.click()
+  } catch (e) {
+    console.error('PNG导出失败:', e)
+  }
+}
+
+// JSON导出
+function exportJson() {
+  const blob = new Blob([JSON.stringify(chart.value, null, 2)], { type: 'application/json' })
+  const a = document.createElement('a')
+  a.download = `紫微命盘-${chart.value?.solarDate}.json`
+  a.href = URL.createObjectURL(blob)
+  a.click()
+  URL.revokeObjectURL(a.href)
 }
 
 function loadRecord(r: any) {
