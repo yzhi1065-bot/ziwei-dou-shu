@@ -39,6 +39,17 @@
           </div>
         </div>
 
+        <!-- 综合命理解读 -->
+        <div class="scroll-panel rounded-lg p-3 mt-3">
+          <h3 class="font-bold text-sm mb-2">综合解读</h3>
+          <div class="space-y-2">
+            <div v-for="(it, i) in interpretations" :key="i" class="bg-mibai rounded p-2">
+              <b class="text-xs text-zheshi">{{ it.title }}</b>
+              <p class="text-xs text-gray-700 mt-0.5 leading-relaxed">{{ it.content }}</p>
+            </div>
+          </div>
+        </div>
+
         <!-- 四化图例说明 -->
         <div class="scroll-panel rounded-lg p-3 mt-3 text-xs">
           <div class="flex flex-wrap gap-3">
@@ -144,6 +155,7 @@ import { ref, computed, watch } from 'vue'
 import { useChartStore } from '../stores/chart'
 import ZiweiPlate from '../components/ZiweiPlate.vue'
 import ZiweiCircle from '../components/ZiweiCircle.vue'
+import { interpretChart } from '../utils/interpret'
 
 const store = useChartStore()
 const plateMode = ref('square')
@@ -161,6 +173,8 @@ function calcPlateSize() {
 calcPlateSize()
 window.addEventListener('resize', calcPlateSize)
 const fp = computed(() => chart.value?.fourPillars)
+// 综合命理解读
+const interpretations = computed(() => interpretChart(chart.value))
 
 const selIdx = ref<number | null>(null)
 const fy = ref(new Date().getFullYear())
