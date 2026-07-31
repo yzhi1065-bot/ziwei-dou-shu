@@ -28,10 +28,18 @@
         <!-- 宫位 -->
         <template v-else-if="c.p">
           <div v-if="c.s" class="zt">身</div>
-          <!-- 自化小箭头（四角，中层） -->
+          <!-- 自化小箭头（四角，中层）：本命实心/大限空心/流年发光 -->
           <template v-if="showSelf">
-            <div v-for="sa in c.selfs" :key="sa.t" class="sa" :class="['sa-'+sa.t, sa.d==='in' ? 'sa-in' : 'sa-out']"
+            <div v-for="sa in c.selfs" :key="'m'+sa.t" class="sa" :class="['sa-'+sa.t, sa.d==='in' ? 'sa-in' : 'sa-out']"
               :style="{ background: saColor[sa.t], border: '0.5px solid rgba(0,0,0,0.15)' }">
+              <span class="sa-label" v-if="mode==='letter'">{{ LETTER[sa.t] }}</span>
+            </div>
+            <div v-for="sa in c.selfsDec" :key="'d'+sa.t" class="sa sa-hollow" :class="['sa-'+sa.t, sa.d==='in' ? 'sa-in' : 'sa-out']"
+              :style="{ borderColor: saColor[sa.t] }">
+              <span class="sa-label" v-if="mode==='letter'">{{ LETTER[sa.t] }}</span>
+            </div>
+            <div v-for="sa in c.selfsYr" :key="'y'+sa.t" class="sa sa-glow" :class="['sa-'+sa.t, sa.d==='in' ? 'sa-in' : 'sa-out']"
+              :style="{ background: saColor[sa.t] }">
               <span class="sa-label" v-if="mode==='letter'">{{ LETTER[sa.t] }}</span>
             </div>
           </template>
@@ -66,20 +74,22 @@ import { computed } from 'vue'
 const props = defineProps<{
   palaces:any[]; size?:number; fp?:any; solarDate?:string; timeRange?:string
   ep?:string; mm?:string; sm?:string; gender?:string
-  selfArrows?:any[]; flyLines?:any[]; decadeFly?:any[]; yearlyFly?:any[]
-  showSelf?:boolean; showFly?:boolean; showDecade?:boolean; showYearly?:boolean
+  selfArrows?:any[]; decadeSelfArrows?:any[]; yearlySelfArrows?:any[]
+  flyLines?:any[]; decadeFly?:any[]; yearlyFly?:any[]
+  showSelf?:boolean; showFly?:boolean; showSelfDecade?:boolean; showSelfYearly?:boolean
+  showDecade?:boolean; showYearly?:boolean
   mode?:string; density?:string
 }>()
 const emit = defineEmits(['sel'])
 
-// 文墨标准配色
-const saColor: Record<string,string> = { '禄':'#4CAF50', '权':'#9C27B0', '科':'#2196F3', '忌':'#F44336' }
+// 文墨标准配色（全局统一）
+const saColor: Record<string,string> = { '禄':'#27AE60', '权':'#8E44AD', '科':'#3498DB', '忌':'#E74C3C' }
 const LETTER: Record<string,string> = { '禄':'A', '权':'B', '科':'C', '忌':'D' }
-// 三层飞线样式
+// 三层飞线样式：生年粗实线 / 大限虚线 / 流年细发光
 const FLY_STYLE: Record<string,any> = {
-  '命': { w:2, dash:'', op:0.8 },
-  '限': { w:1.5, dash:'6,3', op:0.7 },
-  '流': { w:1, dash:'', op:0.9 },
+  '命': { w:2, dash:'', op:0.65, glow:false },
+  '限': { w:1.5, dash:'6,3', op:0.6, glow:false },
+  '流': { w:1, dash:'', op:0.7, glow:true },
 }
 
 const EB = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥']
@@ -90,12 +100,14 @@ const EG:Record<string,[number,number]> = {
 const EI:Record<string,number> = Object.fromEntries(EB.map((k,i)=>[k,i]))
 
 const cells = computed(() => {
-  const r:any[] = [{ k:'cc', r:'2/span 2', c2:'2/span 2', p:null, c:true, m:false, s:false, selfs:[], i:-1 }]
+  const r:any[] = [{ k:'cc', r:'2/span 2', c2:'2/span 2', p:null, c:true, m:false, s:false, selfs:[], selfsDec:[], selfsYr:[], i:-1 }]
   for (const [eb,[row,col]] of Object.entries(EG)) {
     const p = props.palaces?.find((p2:any) => p2.branch === eb) || null
     const bi = EI[eb]
     const selfs = (props.selfArrows||[]).filter((sa:any) => sa.palaceBranch === bi)
-    r.push({ k:eb, r:String(row), c2:String(col), p, c:false, m:p?.name==='命宫', s:!!p?.isShen, selfs, i:bi })
+    const selfsDec = (props.showSelfDecade ? props.decadeSelfArrows||[] : []).filter((sa:any) => sa.palaceBranch === bi)
+    const selfsYr = (props.showSelfYearly ? props.yearlySelfArrows||[] : []).filter((sa:any) => sa.palaceBranch === bi)
+    r.push({ k:eb, r:String(row), c2:String(col), p, c:false, m:p?.name==='命宫', s:!!p?.isShen, selfs, selfsDec, selfsYr, i:bi })
   }
   return r
 })
@@ -163,6 +175,10 @@ const bc = (s:any) => {
 
 /* 自化箭头 - 四角定位，尺寸=宫格6-8% */
 .sa { position:absolute; width:9px; height:9px; z-index:5; opacity:0.85; }
+/* 大限自化：空心描边 */
+.sa-hollow { background: transparent !important; border: 1.5px solid; opacity:0.7; clip-path:none !important; transform:none !important; }
+/* 流年自化：实心+发光 */
+.sa-glow { opacity:0.8; box-shadow: 0 0 4px 1px currentColor; }
 /* 离心：朝宫格外侧 */
 .sa-out.sa-禄 { top:1px; left:1px; clip-path:polygon(0 0, 100% 0, 50% 100%); }
 .sa-out.sa-权 { top:1px; right:1px; clip-path:polygon(0 0, 100% 0, 50% 100%); }

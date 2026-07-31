@@ -13,8 +13,10 @@
       <div class="lg:col-span-3">
         <ZiweiPlate :palaces="chart.palaces" :size="600" :fp="fp" :solarDate="chart.solarDate" :timeRange="chart.timeRange"
           :ep="chart.elementPhase" :mm="chart.mingMaster" :sm="chart.shenMaster" :gender="chart.gender" @sel="selIdx=$event"
-          :selfArrows="chart.selfArrows" :flyLines="chart.flyLines" :decadeFly="chart.decadeFly" :yearlyFly="chart.yearlyFly"
+          :selfArrows="chart.selfArrows" :decadeSelfArrows="chart.decadeSelfArrows" :yearlySelfArrows="chart.yearlySelfArrows"
+          :flyLines="chart.flyLines" :decadeFly="chart.decadeFly" :yearlyFly="chart.yearlyFly"
           :showSelf="store.arrowSettings.showSelf" :showFly="store.arrowSettings.showFly"
+          :showSelfDecade="store.arrowSettings.showSelfDecade" :showSelfYearly="store.arrowSettings.showSelfYearly"
           :showDecade="store.arrowSettings.showDecade" :showYearly="store.arrowSettings.showYearly"
           :mode="store.arrowSettings.mode" :density="store.arrowSettings.density" />
       </div>
@@ -32,6 +34,10 @@
           <span class="text-gray-300 mx-1">|</span>
           <button @click="store.arrowSettings.showSelf=!store.arrowSettings.showSelf" class="px-1 text-xs rounded"
             :class="store.arrowSettings.showSelf?'bg-green-100 text-green-700':'bg-gray-100 text-gray-400'">自化</button>
+          <button @click="store.arrowSettings.showSelfDecade=!store.arrowSettings.showSelfDecade" class="px-1 text-xs rounded"
+            :class="store.arrowSettings.showSelfDecade?'bg-orange-100 text-orange-700':'bg-gray-100 text-gray-400'">限自</button>
+          <button @click="store.arrowSettings.showSelfYearly=!store.arrowSettings.showSelfYearly" class="px-1 text-xs rounded"
+            :class="store.arrowSettings.showSelfYearly?'bg-yellow-100 text-yellow-700':'bg-gray-100 text-gray-400'">流自</button>
           <button @click="store.arrowSettings.showFly=!store.arrowSettings.showFly" class="px-1 text-xs rounded"
             :class="store.arrowSettings.showFly?'bg-purple-100 text-purple-700':'bg-gray-100 text-gray-400'">飞星</button>
           <button @click="store.arrowSettings.showDecade=!store.arrowSettings.showDecade" class="px-1 text-xs rounded"

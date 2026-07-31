@@ -10,6 +10,7 @@ export const useChartStore = defineStore('chart', () => {
   // 箭头设置
   const arrowSettings = ref({
     showSelf: true, showFly: true,
+    showSelfDecade: true, showSelfYearly: true,
     showDecade: true, showYearly: true,
     mode: 'color' as 'color'|'letter',
     density: 'full' as 'full'|'mini',
@@ -121,10 +122,51 @@ export const useChartStore = defineStore('chart', () => {
         })
       })
 
-      // === 流年四化飞线（当年流年天干）===
+      // === 大限命宫自化箭头（当前大限宫干 → 命宫自化）===
+      const decadeSelfArrows:any[] = []
+      const decadePalace = a.palaces.find((p:any) => {
+        if (!p.decadal) return false
+        const [s,e] = p.decadal.range
+        return age >= s && age <= e
+      })
+      if (decadePalace) {
+        const dstem = decadePalace.decadal.heavenlyStem
+        const dBi = EB.indexOf(decadePalace.earthlyBranch)
+        const starsD = hsTableCN[dstem] || []
+        starsD.forEach((starName:string, si:number) => {
+          const target = a.palaces.find((pp:any) =>
+            [...(pp.majorStars||[]), ...(pp.minorStars||[])].some((s:any) => s.name === starName)
+          )
+          if (target) {
+            decadeSelfArrows.push({
+              palaceBranch: EB.indexOf(target.earthlyBranch),
+              type: MUTAGEN_TYPES[si],
+              direction: target === decadePalace ? 'out' : 'in',
+              starName, layer: '限',
+            })
+          }
+        })
+      }
+
+      // === 流年自化箭头（当年流年天干）===
+      const yearlySelfArrows:any[] = []
+      const nowY = new Date()
+      const ystem = getYearStem(nowY.getFullYear())
+      const starsYSelf = hsTableCN[ystem] || []
+      starsYSelf.forEach((starName:string, si:number) => {
+        const target = a.palaces.find((pp:any) =>
+          [...(pp.majorStars||[]), ...(pp.minorStars||[])].some((s:any) => s.name === starName)
+        )
+        if (target) {
+          yearlySelfArrows.push({
+            palaceBranch: EB.indexOf(target.earthlyBranch),
+            type: MUTAGEN_TYPES[si],
+            direction: 'out', // 流年自化简化朝外
+            starName, layer: '流',
+          })
+        }
+      })
       const yearlyFly:any[] = []
-      const now = new Date()
-      const ystem = EB.length ? getYearStem(now.getFullYear()) : ''
       const starsY = hsTableCN[ystem] || []
       starsY.forEach((starName:string, si:number) => {
         const target = a.palaces.find((pp:any) =>
@@ -145,7 +187,8 @@ export const useChartStore = defineStore('chart', () => {
         gender, solarDate: `${year}-${month}-${day}`, timeRange: a.timeRange||'',
         sortedBranches: sorted.map((p:any) => EB.indexOf(p.earthlyBranch)),
         // 自化箭头 & 飞线 & 宫位
-        selfArrows, flyLines: uniqueFly, decadeFly, yearlyFly,
+        selfArrows, decadeSelfArrows, yearlySelfArrows,
+        flyLines: uniqueFly, decadeFly, yearlyFly,
         palaces: sorted.map((p:any) => {
           const op = a.palaces.find((op2:any) => op2.earthlyBranch === p.earthlyBranch)
           const selfTypes = selfArrows.filter((sa:any) => sa.palaceBranch === EB.indexOf(p.earthlyBranch)).map((sa:any) => sa.type)
