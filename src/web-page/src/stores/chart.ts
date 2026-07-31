@@ -237,14 +237,20 @@ export const useChartStore = defineStore('chart', () => {
     }
   }
 
-  async function generateChart(year: number, month: number, day: number, hour: number, minute: number, gender: string = '男', school: string = 'sanhe') {
+  async function generateChart(year: number, month: number, day: number, hour: number, minute: number, gender: string = '男', school: string = 'sanhe', longitude?: number) {
     try {
       const iz = await import('iztro')
       // 浏览器打包后 iztro 导出在 default 对象里
       const astro = (iz as any).default?.astro || (iz as any).astro
-      // 小时(0-23) → iztro timeIndex(0=子时00:00, 6=午时, 12=晚子时23:00)
-      // 例: 0点→0, 12点→6(午时), 23点→12(晚子时)
-      const timeIndex = Math.floor((hour + 1) / 2)
+      // 真太阳时修正：北京时间→地方平太阳时+均时差，修正时辰索引
+      let timeIndex = Math.floor((hour + 1) / 2)
+      if (longitude !== undefined && longitude !== 120) {
+        try {
+          const { calcTrueSolarTime } = await import('@core/calendar/timezone')
+          const t = calcTrueSolarTime(year, month, day, hour, minute, longitude)
+          timeIndex = t.timeBranchIndex
+        } catch { /* 真太阳时失败则用北京时间 */ }
+      }
       const a = astro.bySolar(`${year}-${month}-${day}`, timeIndex, gender==='男'?'男':'女', true, 'zh-CN')
       rawAstrolabe.value = a
 

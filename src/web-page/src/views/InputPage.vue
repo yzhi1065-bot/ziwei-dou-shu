@@ -84,6 +84,16 @@
           </div>
         </div>
 
+        <!-- 出生地点（真太阳时） -->
+        <div>
+          <label class="block text-sm text-gray-600 mb-1 font-song">出生地点 <span class="text-gray-400 text-xs">（真太阳时修正时辰）</span></label>
+          <select v-model="form.longitude"
+                  class="w-full px-3 py-2 border border-gray-300 rounded bg-white focus:border-jinbo outline-none">
+            <option :value="120">北京（东经120°·标准时间）</option>
+            <option v-for="c in cities" :key="c.city" :value="c.longitude">{{ c.city }}（东经{{ c.longitude }}°）</option>
+          </select>
+        </div>
+
         <!-- 提交按钮 -->
         <button type="submit"
                 class="w-full py-3 rounded-lg text-white font-song text-lg tracking-wider transition-all duration-300"
@@ -113,6 +123,7 @@ import { useRouter } from 'vue-router'
 import { useChartStore } from '../stores/chart'
 import type { Gender, School } from '@core/types'
 import { solarToLunar, lunarToSolar } from '@core/calendar/lunar'
+import { CITY_LOCATIONS } from '@core/calendar/timezone'
 
 const router = useRouter()
 const chartStore = useChartStore()
@@ -126,7 +137,10 @@ const form = reactive({
   gender: '男' as Gender,
   school: 'sanhe' as School,
   isLunar: false,
+  longitude: 120,
 })
+
+const cities = CITY_LOCATIONS.slice(0, 36)
 
 // 农历↔公历切换时保持日期一致
 function syncLunar() {
@@ -170,7 +184,8 @@ async function handleSubmit() {
   await chartStore.generateChart(
     sy, sm, sd,
     form.hour, form.minute,
-    form.gender, form.school
+    form.gender, form.school,
+    form.longitude
   )
   router.push('/chart')
 }
