@@ -111,22 +111,67 @@ export interface Pillar {
   branch: string
 }
 
-/** 计算四柱（年柱/月柱/日柱/时柱） */
+// 五虎遁月干起点：年干 → 寅月天干
+function monthStemStart(yearStem: string): number {
+  const idx = STEMS.indexOf(yearStem)
+  return ((idx % 10) * 2 + 2) % 10 // 甲己→丙, 乙庚→戊...
+}
+
+// 五鼠遁时干起点：日干 → 子时天干
+// 甲己→甲(0), 乙庚→丙(2), 丙辛→戊(4), 丁壬→庚(6), 戊癸→壬(8)
+function hourStemStart(dayStem: string): number {
+  const idx = STEMS.indexOf(dayStem)
+  return ((idx % 10) * 2) % 10
+}
+
+/**
+ * 计算四柱（与iztro/文墨天机一致）
+ * - 年柱: 农历年干支（正月初一换年）
+ * - 月柱: 农历月干支（正月初一换月，五虎遁）
+ * - 日柱: 晚子时(23点)换次日
+ * - 时柱: 五鼠遁
+ */
 export function getFourPillars(
   year: number, month: number, day: number, hour: number,
   isLunar: boolean = false
 ): { yearPillar: Pillar; monthPillar: Pillar; dayPillar: Pillar; hourPillar: Pillar } {
   const solar = Solar.fromYmdHms(year, month, day, hour, 0, 0)
   const lunar = solar.getLunar()
-  const ec = lunar.getEightChar()
-  const split = (s: string): Pillar => ({ stem: s.slice(0, 1), branch: s.slice(1, 2) })
+  const timeIdx = Math.floor((hour + 1) % 24 / 2) // 0=子时00:00, 12=晚子时23:00
+  const lateZi = hour >= 23 // 晚子时(23:00-24:00)
+  // 晚子时日柱用次日
+  const dayLunar = lateZi ? (lunar as any).next(1) : lunar
+
+  const yearStem = lunar.getYearInGanZhi().slice(0, 1)
+  // 农历月柱：月支=寅起正月顺数，月干=年干五虎遁+月偏移
+  // 闰月规则（文墨天机/iztro）：闰月15日(含)前算本月，16日后算下月
+  const rawMonth = lunar.getMonth()
+  let lunarMonth = Math.abs(rawMonth)
+  if (rawMonth < 0) {
+    lunarMonth = lunar.getDay() <= 15 ? lunarMonth : lunarMonth + 1
+  }
+  const monthBranchIdx = (lunarMonth - 1) % 12 // 正月=0→寅
+  const monthStem = STEMS[(monthStemStart(yearStem) + lunarMonth - 1) % 10]
+
+  // 日柱
+  const dayGz = dayLunar.getDayInGanZhi()
+  const dayStem = dayGz.slice(0, 1)
+  // 时柱：时支=子起timeIdx, 时干=日干五鼠遁+时支偏移
+  const timeBranchIdx = timeIdx % 12 // 0=子, 1=丑...
+  const timeStem = STEMS[(hourStemStart(dayStem) + timeBranchIdx) % 10]
+
   return {
-    yearPillar: split(ec.getYear()),
-    monthPillar: split(ec.getMonth()),
-    dayPillar: split(ec.getDay()),
-    hourPillar: split(ec.getTime()),
+    yearPillar: { stem: yearStem, branch: lunar.getYearInGanZhi().slice(1, 2) },
+    monthPillar: { stem: monthStem, branch: MONTH_BRANCH[monthBranchIdx] },
+    dayPillar: { stem: dayStem, branch: dayGz.slice(1, 2) },
+    hourPillar: { stem: timeStem, branch: TIME_BRANCH[timeBranchIdx] },
   }
 }
+
+/** 月支表：正月起寅 */
+const MONTH_BRANCH = ['寅','卯','辰','巳','午','未','申','酉','戌','亥','子','丑']
+/** 时支表：子时起子 */
+const TIME_BRANCH = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥']
 
 /** 年柱（兼容旧接口：只传年份时默认取年中6月30日，保证立春已过） */
 export function getYearPillar(year: number, month?: number, day?: number): Pillar {

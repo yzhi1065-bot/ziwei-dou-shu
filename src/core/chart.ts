@@ -62,24 +62,18 @@ export function createChart(input: ChartInput): ChartResult {
     isLeap = lunar.isLeap
   }
   
-  // 2. 计算四柱八字
-  // 需要精确节气计算年柱分界
-  const afterSpring = hasPassedSpringStart(solarYear, solarMonth, solarDay)
-  
-  // 年柱：立春后取当年，立春前取前一年
-  const yearForStem = afterSpring ? solarYear : solarYear - 1
-  const yearStemIdx = (yearForStem - 4) % 10
-  const yearBranchIdx = ((yearForStem - 4) % 12 + 12) % 12
-  const yearStem = HEAVENLY_STEMS[((yearStemIdx % 10) + 10) % 10]
-  const yearBranch = EARTH_BRANCHES[((yearBranchIdx % 12) + 12) % 12]
-  
+  // 2. 计算四柱八字（农历年/月，与iztro/文墨天机一致）
   const fourPillars = getFourPillars(solarYear, solarMonth, solarDay, hour, false)
+  // 农历年干支索引（正月初一换年，用于五行局宫干/大限，与四柱年柱一致）
+  const yearStemIdx = HEAVENLY_STEMS.indexOf(fourPillars.yearPillar.stem)
+  const yearBranchIdx = EARTH_BRANCHES.indexOf(fourPillars.yearPillar.branch)
   
   const timeBranchIndex = getTimeBranchIndex(solarYear, solarMonth, solarDay, hour, minute, longitude)
   
-  // 4. 命宫身宫
-  const mingBranchIndex = calcMingPalace(lunarMonth, timeBranchIndex, false)
-  const shenBranchIndex = calcShenPalace(lunarMonth, timeBranchIndex)
+  // 4. 命宫身宫（闰月15日前算本月，16日后算下月——与iztro一致）
+  const mingLunarMonth = lunarMonth < 0 ? (lunarDay <= 15 ? -lunarMonth : -lunarMonth + 1) : lunarMonth
+  const mingBranchIndex = calcMingPalace(mingLunarMonth, timeBranchIndex, false)
+  const shenBranchIndex = calcShenPalace(mingLunarMonth, timeBranchIndex)
   
   // 5. 五行局（使用命宫正确天干，非年干）
   const mingStem = calcPalaceStem(((yearStemIdx % 10) + 10) % 10, mingBranchIndex)
@@ -101,9 +95,8 @@ export function createChart(input: ChartInput): ChartResult {
     true, true
   )
   
-  // 9. 四化（本命四化）
-  // 本命四化以生年天干起
-  const yearStemForHua = yearStem
+  // 9. 四化（本命四化，以农历年天干起——与iztro一致）
+  const yearStemForHua = fourPillars.yearPillar.stem
   const huaList = getAllMingHua(yearStemForHua, school as School)
   
   // 构建四化映射
@@ -182,7 +175,8 @@ export function createChart(input: ChartInput): ChartResult {
   return {
     input,
     fourPillars: {
-      year: `${yearStem}${yearBranch}`,
+      // 年柱用农历年（与iztro/文墨天机一致：正月初一换年）
+      year: `${fourPillars.yearPillar.stem}${fourPillars.yearPillar.branch}`,
       month: `${fourPillars.monthPillar.stem}${fourPillars.monthPillar.branch}`,
       day: `${fourPillars.dayPillar.stem}${fourPillars.dayPillar.branch}`,
       hour: `${fourPillars.hourPillar.stem}${fourPillars.hourPillar.branch}`,
