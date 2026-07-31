@@ -35,7 +35,7 @@
               <span class="sa-label" v-if="mode==='letter'">{{ LETTER[sa.type] }}</span>
             </div>
             <div v-for="sa in c.selfsDec" :key="'d'+sa.type" class="sa sa-hollow" :class="['sa-'+sa.type, sa.direction==='in' ? 'sa-in' : 'sa-out']"
-              :style="{ borderColor: saColor[sa.type] }">
+              :style="{ background: saColor[sa.type] }">
               <span class="sa-label" v-if="mode==='letter'">{{ LETTER[sa.type] }}</span>
             </div>
             <div v-for="sa in c.selfsYr" :key="'y'+sa.type" class="sa sa-glow" :class="['sa-'+sa.type, sa.direction==='in' ? 'sa-in' : 'sa-out']"
@@ -175,8 +175,8 @@ const bc = (s:any) => {
 
 /* 自化箭头 - 四角定位，尺寸=宫格6-8% */
 .sa { position:absolute; width:9px; height:9px; z-index:5; opacity:0.85; }
-/* 大限自化：空心描边 */
-.sa-hollow { background: transparent !important; border: 1.5px solid; opacity:0.7; clip-path:none !important; transform:none !important; }
+/* 大限自化：实心+透明度0.7（与实心本命区分） */
+.sa-hollow { opacity:0.7 !important; filter:saturate(0.9); }
 /* 流年自化：实心+发光 */
 .sa-glow { opacity:0.8; box-shadow: 0 0 4px 1px currentColor; }
 /* 离心：朝宫格外侧 */
