@@ -29,19 +29,23 @@
         <template v-else-if="c.p">
           <div v-if="c.s" class="zt">身</div>
 
-          <!-- 自化细长箭头 -->
+          <!-- 自化箭头：细长箭杆+箭头尖（→形状） -->
           <template v-if="showSelf">
             <!-- 向外箭头：贴宫格外框边，尖端朝外 -->
             <div v-if="c.outArrows.length" class="sa-row" :class="'sa-row-'+c.outerDir">
-              <span v-for="a in c.outArrows" :key="'o'+a.type" class="sa" :class="['sa-'+a.type, 'sa-dir-'+c.outerDir, a.layer==='限'?'sa-hollow':a.layer==='流'?'sa-glow':'']"
-                :style="{ background: saColor[a.type] }">
+              <span v-for="a in c.outArrows" :key="'o'+a.type" class="sa" :class="['sa-dir-'+c.outerDir, a.layer==='限'?'sa-hollow':a.layer==='流'?'sa-glow':'']"
+                :style="{ color: saColor[a.type] }">
+                <i class="sa-stem" :style="{ background: saColor[a.type] }"></i>
+                <i class="sa-head" :style="{ borderLeftColor: saColor[a.type] }"></i>
                 <b v-if="mode==='letter'" class="sa-l">{{ LETTER[a.type] }}</b>
               </span>
             </div>
             <!-- 向内箭头：贴宫格内框边（靠盘心），尖端朝盘心 -->
             <div v-if="c.inArrows.length" class="sa-row" :class="'sa-row-in-'+c.innerDir">
-              <span v-for="a in c.inArrows" :key="'i'+a.type" class="sa" :class="['sa-'+a.type, 'sa-dir-'+c.innerDir, a.layer==='限'?'sa-hollow':a.layer==='流'?'sa-glow':'']"
-                :style="{ background: saColor[a.type] }">
+              <span v-for="a in c.inArrows" :key="'i'+a.type" class="sa" :class="['sa-dir-'+c.innerDir, a.layer==='限'?'sa-hollow':a.layer==='流'?'sa-glow':'']"
+                :style="{ color: saColor[a.type] }">
+                <i class="sa-stem" :style="{ background: saColor[a.type] }"></i>
+                <i class="sa-head" :style="{ borderLeftColor: saColor[a.type] }"></i>
                 <b v-if="mode==='letter'" class="sa-l">{{ LETTER[a.type] }}</b>
               </span>
             </div>
@@ -190,33 +194,33 @@ const bc = (s:any) => {
 .zw-s { border-color:#8aaa7a!important; border-width:2px!important; }
 .zw-cc { background:#efe4d0!important; border:none!important; cursor:default; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; z-index:1; }
 
-/* === 细长自化箭头 ===
-   细长形：宽4px 高14px 尖端朝上的三角
-   sa-dir-up=尖端朝上  down=朝下  left=朝左  right=朝右 */
-.sa-row { position:absolute; z-index:6; display:flex; gap:1px; align-items:center; }
-/* 外框边：尖端朝外 */
-.sa-row-up { top:-2px; left:50%; transform:translateX(-50%); }
-.sa-row-down { bottom:-2px; left:50%; transform:translateX(-50%); }
-.sa-row-left { left:-2px; top:50%; transform:translateY(-50%) rotate(90deg); }
-.sa-row-right { right:-2px; top:50%; transform:translateY(-50%) rotate(-90deg); }
-/* 内框边（靠盘心）：尖端朝盘心 */
-.sa-row-up.sa-inrow, .sa-row-up[class*="in"] {}
-.sa { display:block; width:4px; height:14px; clip-path:polygon(50% 0, 100% 100%, 0 100%); }
-/* 方向旋转（尖端指向） */
-.sa-dir-up { transform:rotate(0deg); }
-.sa-dir-down { transform:rotate(180deg); }
-.sa-dir-left { transform:rotate(-90deg); }
-.sa-dir-right { transform:rotate(90deg); }
+/* === 细长箭头（→形状）：杆+箭头尖 ===
+   默认尖端朝右，sa-dir-* 旋转方向 */
+.sa-row { position:absolute; z-index:6; display:flex; gap:2px; align-items:center; }
+/* 外框边 */
+.sa-row-up { top:-3px; left:50%; transform:translateX(-50%); }
+.sa-row-down { bottom:-3px; left:50%; transform:translateX(-50%); }
+.sa-row-left { left:-3px; top:50%; transform:translateY(-50%) rotate(-90deg); }
+.sa-row-right { right:-3px; top:50%; transform:translateY(-50%) rotate(90deg); }
+/* 内框边（靠盘心）：只定位，方向由箭头sa-dir-*控制 */
+.sa-row-in-up { top:3px; left:50%; transform:translateX(-50%); }
+.sa-row-in-down { bottom:3px; left:50%; transform:translateX(-50%); }
+.sa-row-in-left { left:3px; top:50%; transform:translateY(-50%); }
+.sa-row-in-right { right:3px; top:50%; transform:translateY(-50%); }
+
+.sa { display:inline-flex; align-items:center; }
+/* 箭头旋转：尖端方向 */
+.sa-dir-up { transform:rotate(-90deg); }
+.sa-dir-down { transform:rotate(90deg); }
+.sa-dir-left { transform:rotate(180deg); }
+.sa-dir-right { transform:rotate(0deg); }
+.sa-stem { display:block; width:10px; height:2px; border-radius:1px; }
+.sa-head { display:block; width:0; height:0; border-top:3px solid transparent; border-bottom:3px solid transparent; border-left:6px solid; }
 /* 大限：透明度0.7 */
 .sa-hollow { opacity:0.7; }
 /* 流年：发光 */
 .sa-glow { opacity:0.8; filter:drop-shadow(0 0 2px currentColor); }
-.sa-l { font-size:5px; color:#fff; font-weight:bold; text-shadow:0 0 2px rgba(0,0,0,.5); }
-/* 内框边箭头容器：贴宫格内侧朝向盘心 */
-.sa-row-in-up { top:3px; left:50%; transform:translateX(-50%); }
-.sa-row-in-down { bottom:3px; left:50%; transform:translateX(-50%); }
-.sa-row-in-left { left:3px; top:50%; transform:translateY(-50%) rotate(90deg); }
-.sa-row-in-right { right:3px; top:50%; transform:translateY(-50%) rotate(-90deg); }
+.sa-l { font-size:5px; font-weight:bold; margin-left:1px; }
 
 .zcc { display:flex; align-items:center; gap:1px; font-size:9px; line-height:1.4; }
 .zcl { color:#a09080; font-size:7px; white-space:nowrap; }
