@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <circle cx="32" cy="32" r="30" fill="#F5F0E1" stroke="#CC7722" stroke-width="2"/>
+  <text x="32" y="28" text-anchor="middle" font-size="12" fill="#1a1a2e" font-family="serif" font-weight="bold">紫微</text>
+  <text x="32" y="44" text-anchor="middle" font-size="12" fill="#1a1a2e" font-family="serif" font-weight="bold">斗数</text>
+  <circle cx="32" cy="32" r="2" fill="#CC7722"/>
+</svg>
