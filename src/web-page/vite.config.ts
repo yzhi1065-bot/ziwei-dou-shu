@@ -5,6 +5,8 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
+  // GitHub Pages子路径部署
+  base: '/ziwei-dou-shu/',
   plugins: [
     vue(),
     VitePWA({

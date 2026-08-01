@@ -5,7 +5,7 @@ import App from './App.vue'
 import './style.css'
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     { path: '/', name: 'input', component: () => import('./views/InputPage.vue') },
     { path: '/chart', name: 'chart', component: () => import('./views/MainChart.vue') },
